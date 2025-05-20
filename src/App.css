@@ -11,12 +11,20 @@
   position: relative;
 }
 
+/* Default for Android and other devices - 120px margin */
 .canvas-editor {
   width: 100%;
-  height: calc(100vh - 110px);
+  height: calc(100vh - 120px);
   position: absolute;
   top: 0;
   left: 0;
+}
+
+/* iOS specific height adjustment - 60px margin */
+@supports (-webkit-touch-callout: none) {
+  .canvas-editor {
+    height: calc(100vh - 60px);
+  }
 }
 
 /* Override any Polotno container styles to ensure full width */
