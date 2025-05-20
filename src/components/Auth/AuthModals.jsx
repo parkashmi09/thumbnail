@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { X, Eye, EyeOff, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import './AuthModals.css';
-import logo from '../../assets/images/Logo.png';
+import Logo from '../../assets/images/Logo.png';
 import googleIcon from '../../assets/images/ggogle.png';
 import { motion } from 'framer-motion';
 import axios from 'axios';
@@ -199,7 +199,7 @@ const LogoHeader = memo(() => (
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: 0.1, duration: 0.5, type: 'spring', bounce: 0.3 }}
   >
-    <img src={logo} alt="Logo" className="modal-logo" />
+    <img src={Logo} alt="Logo" className="modal-logo" />
   </motion.div>
 ));
 
