@@ -1,0 +1,121 @@
+.app-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  position: relative;
+}
+
+.canvas-editor {
+  width: 100%;
+  height: calc(100vh - 60px);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Override any Polotno container styles to ensure full width */
+.polotno-app-container {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ensure workspace takes full available space */
+.polotno-workspace-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Add this to ensure the pages have the right overflow behavior */
+
+.home-layout, 
+.pricing-layout {
+  height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  position: relative;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* smooth scrolling for iOS */
+  scrollbar-color: rgba(25, 118, 210, 0.2) rgba(0, 0, 0, 0.05); /* Firefox */
+  scrollbar-width: thin; /* Firefox */
+}
+
+/* Better scrollbars for Chrome, Safari and Edge */
+.home-layout::-webkit-scrollbar,
+.pricing-layout::-webkit-scrollbar {
+  width: 8px;
+}
+
+.home-layout::-webkit-scrollbar-track,
+.pricing-layout::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.home-layout::-webkit-scrollbar-thumb,
+.pricing-layout::-webkit-scrollbar-thumb {
+  background: rgba(25, 118, 210, 0.2);
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.home-layout::-webkit-scrollbar-thumb:hover,
+.pricing-layout::-webkit-scrollbar-thumb:hover {
+  background: rgba(25, 118, 210, 0.4);
+}
+
+/* Ensure smooth scrolling across browsers */
+@supports (scroll-behavior: smooth) {
+  .home-layout,
+  .pricing-layout,
+  .scrollable-content,
+  .template-scroll-container {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.home-layout, 
+.pricing-layout {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: thin;  /* Firefox */
+}
+
+/* Scrollable content container with improved scroll experience */
+.scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: calc(100vh - 350px);
+  position: relative;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
+  scrollbar-color: rgba(25, 118, 210, 0.2) rgba(0, 0, 0, 0.05); /* Firefox */
+  scrollbar-width: thin; /* Firefox */
+}
+
+.scrollable-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollable-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb {
+  background: rgba(25, 118, 210, 0.2);
+  border-radius: 4px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(25, 118, 210, 0.4);
+}

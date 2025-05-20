@@ -1,0 +1,1735 @@
+/* Template Grid specific styles */
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px 16px;
+  margin: 0;
+  width: 100%;
+}
+
+/* Five columns grid for large screens */
+.template-grid-five {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+/* Force template cards to be visible immediately */
+.template-grid .template-card {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%; /* Ensure cards take full width of their grid cell */
+}
+
+.template-grid .template-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Force image display */
+.template-img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  display: block !important;
+}
+
+.template-name {
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Skeleton card styles */
+.skeleton-card {
+  background: #eaeaea;
+  box-shadow: none;
+  animation: pulse 1.5s ease-in-out infinite !important;
+}
+
+.skeleton-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  background: linear-gradient(90deg, 
+    #e8e8e8 0%, 
+    #f5f5f5 50%, 
+    #e8e8e8 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Bottom loader styles with higher visibility */
+.bottom-loader-sentinel {
+  width: 100%;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 30px 0;
+  padding: 20px 0;
+}
+
+.circular-loader-container {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  padding: 10px 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  width: fit-content;
+}
+
+.circular-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.spinner {
+  animation: rotate 2s linear infinite;
+  width: 40px;
+  height: 40px;
+}
+
+.path {
+  stroke: #1976d2;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+.loading-text {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+/* End message style */
+.end-message {
+  text-align: center;
+  margin: 20px 0;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #f0f8ff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  color: #333;
+  font-weight: 500;
+  width: 100%;
+}
+
+.end-message p {
+  font-size: 16px;
+  margin: 0;
+  color: #1976d2;
+}
+
+/* Error message style */
+.error-message {
+  text-align: center;
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  color: #333;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.5s ease;
+}
+
+.error-message .refresh-icon {
+  color: #ea4335;
+  margin-bottom: 16px;
+  animation: spin 3s infinite linear paused;
+}
+
+.error-message:hover .refresh-icon {
+  animation-play-state: running;
+}
+
+.error-message p {
+  font-size: 16px;
+  margin: 0 0 20px 0;
+  color: #666;
+}
+
+.refresh-button {
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.2);
+}
+
+.refresh-button:hover {
+  background: #1565c0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+}
+
+.refresh-button:active {
+  transform: translateY(0);
+}
+
+/* No results message style */
+.no-results-message {
+  width: 100%;
+  padding: 40px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Animation keyframes */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media queries for responsive grid */
+@media (max-width: 1400px) {
+  .template-grid-five {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1100px) {
+  .template-grid-five {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .template-grid-five {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 12px;
+  }
+  
+  .circular-loader-container {
+    padding: 8px 16px;
+  }
+  
+  .end-message {
+    padding: 10px;
+  }
+  
+  .end-message p {
+    font-size: 14px;
+  }
+  
+  .error-message {
+    padding: 20px;
+    margin: 30px auto;
+  }
+  
+  .refresh-button {
+    padding: 8px 20px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .template-grid-five {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  
+  .error-message {
+    padding: 15px;
+    margin: 20px auto;
+  }
+  
+  .error-message p {
+    font-size: 14px;
+  }
+  
+  .refresh-button {
+    padding: 6px 16px;
+    font-size: 12px;
+  }
+}
+
+/* InfiniteScroll Container */
+.template-scroll-container {
+  width: 100%;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  height: calc(100vh - 300px);
+  min-height: 500px;
+  padding-bottom: 120px; /* Increased to make room for bottom loader */
+  position: relative;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
+}
+
+.infinite-scroll-component {
+  overflow-y: visible !important;
+  overflow-x: hidden;
+  min-height: 200px;
+  width: 100% !important;
+}
+
+.infinite-scroll-component__outerdiv {
+  width: 100%;
+}
+
+/* Circular loading spinner for infinite scroll */
+.circular-loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 30px 0;
+  margin: 20px 0 40px;
+  clear: both;
+}
+
+.circular-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px 30px;
+  border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.spinner {
+  animation: rotate 2s linear infinite;
+  width: 40px;
+  height: 40px;
+}
+
+.path {
+  stroke: #1976d2;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+.loading-text {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+/* Scroll detector - invisible element at bottom that triggers loading */
+.scroll-detector {
+  width: 100%;
+  height: 200px;
+  visibility: hidden;
+  position: absolute;
+  bottom: 200px;
+  left: 0;
+  pointer-events: all;
+  z-index: 100;
+}
+
+/* End message style with better visibility */
+.end-message {
+  text-align: center;
+  margin: 30px 0;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: #f0f8ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #333;
+  font-weight: 500;
+  width: 100%;
+  clear: both;
+}
+
+.end-message p {
+  font-size: 16px;
+  margin: 0;
+  color: #1976d2;
+}
+
+/* Error message style */
+.error-message {
+  text-align: center;
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  color: #333;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.5s ease;
+}
+
+.error-message .refresh-icon {
+  color: #ea4335;
+  margin-bottom: 16px;
+  animation: spin 3s infinite linear paused;
+}
+
+.error-message:hover .refresh-icon {
+  animation-play-state: running;
+}
+
+.error-message p {
+  font-size: 16px;
+  margin: 0 0 20px 0;
+  color: #666;
+}
+
+.refresh-button {
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.2);
+}
+
+.refresh-button:hover {
+  background: #1565c0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+}
+
+.refresh-button:active {
+  transform: translateY(0);
+}
+
+/* No results message style */
+.no-results-message {
+  width: 100%;
+  padding: 40px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Animation keyframes */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media queries for responsive grid */
+@media (max-width: 1400px) {
+  .template-grid-five {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1100px) {
+  .template-grid-five {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .template-grid-five {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 12px;
+  }
+  
+  .circular-loader-container {
+    padding: 8px 16px;
+  }
+  
+  .end-message {
+    padding: 10px;
+  }
+  
+  .end-message p {
+    font-size: 14px;
+  }
+  
+  .error-message {
+    padding: 20px;
+    margin: 30px auto;
+  }
+  
+  .refresh-button {
+    padding: 8px 20px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .template-grid-five {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  
+  .error-message {
+    padding: 15px;
+    margin: 20px auto;
+  }
+  
+  .error-message p {
+    font-size: 14px;
+  }
+  
+  .refresh-button {
+    padding: 6px 16px;
+    font-size: 12px;
+  }
+}
+
+/* InfiniteScroll Container */
+.template-scroll-container {
+  width: 100%;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  height: calc(100vh - 300px);
+  min-height: 500px;
+  padding-bottom: 120px; /* Increased to make room for bottom loader */
+  position: relative;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
+}
+
+.infinite-scroll-component {
+  overflow-y: visible !important;
+  overflow-x: hidden;
+  min-height: 200px;
+  width: 100% !important;
+}
+
+.infinite-scroll-component__outerdiv {
+  width: 100%;
+}
+
+/* Circular loading spinner for infinite scroll */
+.circular-loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 30px 0;
+  margin: 20px 0 40px;
+  clear: both;
+}
+
+.circular-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px 30px;
+  border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.spinner {
+  animation: rotate 2s linear infinite;
+  width: 40px;
+  height: 40px;
+}
+
+.path {
+  stroke: #1976d2;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+.loading-text {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+/* Scroll detector - invisible element at bottom that triggers loading */
+.scroll-detector {
+  width: 100%;
+  height: 200px;
+  visibility: hidden;
+  position: absolute;
+  bottom: 200px;
+  left: 0;
+  pointer-events: all;
+  z-index: 100;
+}
+
+/* End message style with better visibility */
+.end-message {
+  text-align: center;
+  margin: 30px 0;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: #f0f8ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #333;
+  font-weight: 500;
+  width: 100%;
+  clear: both;
+}
+
+.end-message p {
+  font-size: 16px;
+  margin: 0;
+  color: #1976d2;
+}
+
+/* Error message style */
+.error-message {
+  text-align: center;
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  color: #333;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.5s ease;
+}
+
+.error-message .refresh-icon {
+  color: #ea4335;
+  margin-bottom: 16px;
+  animation: spin 3s infinite linear paused;
+}
+
+.error-message:hover .refresh-icon {
+  animation-play-state: running;
+}
+
+.error-message p {
+  font-size: 16px;
+  margin: 0 0 20px 0;
+  color: #666;
+}
+
+.refresh-button {
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.2);
+}
+
+.refresh-button:hover {
+  background: #1565c0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+}
+
+.refresh-button:active {
+  transform: translateY(0);
+}
+
+/* No results message style */
+.no-results-message {
+  width: 100%;
+  padding: 40px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Animation keyframes */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media queries for responsive grid */
+@media (max-width: 1400px) {
+  .template-grid-five {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1100px) {
+  .template-grid-five {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .template-grid-five {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 12px;
+  }
+  
+  .circular-loader-container {
+    padding: 8px 16px;
+  }
+  
+  .end-message {
+    padding: 10px;
+  }
+  
+  .end-message p {
+    font-size: 14px;
+  }
+  
+  .error-message {
+    padding: 20px;
+    margin: 30px auto;
+  }
+  
+  .refresh-button {
+    padding: 8px 20px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .template-grid-five {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  
+  .error-message {
+    padding: 15px;
+    margin: 20px auto;
+  }
+  
+  .error-message p {
+    font-size: 14px;
+  }
+  
+  .refresh-button {
+    padding: 6px 16px;
+    font-size: 12px;
+  }
+}
+
+/* InfiniteScroll Container */
+.template-scroll-container {
+  width: 100%;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  height: calc(100vh - 300px);
+  min-height: 500px;
+  padding-bottom: 120px; /* Increased to make room for bottom loader */
+  position: relative;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
+}
+
+.infinite-scroll-component {
+  overflow-y: visible !important;
+  overflow-x: hidden;
+  min-height: 200px;
+  width: 100% !important;
+}
+
+.infinite-scroll-component__outerdiv {
+  width: 100%;
+}
+
+/* Circular loading spinner for infinite scroll */
+.circular-loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 30px 0;
+  margin: 20px 0 40px;
+  clear: both;
+}
+
+.circular-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px 30px;
+  border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.spinner {
+  animation: rotate 2s linear infinite;
+  width: 40px;
+  height: 40px;
+}
+
+.path {
+  stroke: #1976d2;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+.loading-text {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+/* Scroll detector - invisible element at bottom that triggers loading */
+.scroll-detector {
+  width: 100%;
+  height: 200px;
+  visibility: hidden;
+  position: absolute;
+  bottom: 200px;
+  left: 0;
+  pointer-events: all;
+  z-index: 100;
+}
+
+/* End message style with better visibility */
+.end-message {
+  text-align: center;
+  margin: 30px 0;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: #f0f8ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #333;
+  font-weight: 500;
+  width: 100%;
+  clear: both;
+}
+
+.end-message p {
+  font-size: 16px;
+  margin: 0;
+  color: #1976d2;
+}
+
+/* Error message style */
+.error-message {
+  text-align: center;
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  color: #333;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.5s ease;
+}
+
+.error-message .refresh-icon {
+  color: #ea4335;
+  margin-bottom: 16px;
+  animation: spin 3s infinite linear paused;
+}
+
+.error-message:hover .refresh-icon {
+  animation-play-state: running;
+}
+
+.error-message p {
+  font-size: 16px;
+  margin: 0 0 20px 0;
+  color: #666;
+}
+
+.refresh-button {
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.2);
+}
+
+.refresh-button:hover {
+  background: #1565c0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+}
+
+.refresh-button:active {
+  transform: translateY(0);
+}
+
+/* No results message style */
+.no-results-message {
+  width: 100%;
+  padding: 40px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Animation keyframes */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media queries for responsive grid */
+@media (max-width: 1400px) {
+  .template-grid-five {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1100px) {
+  .template-grid-five {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .template-grid-five {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 12px;
+  }
+  
+  .circular-loader-container {
+    padding: 8px 16px;
+  }
+  
+  .end-message {
+    padding: 10px;
+  }
+  
+  .end-message p {
+    font-size: 14px;
+  }
+  
+  .error-message {
+    padding: 20px;
+    margin: 30px auto;
+  }
+  
+  .refresh-button {
+    padding: 8px 20px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .template-grid-five {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  
+  .error-message {
+    padding: 15px;
+    margin: 20px auto;
+  }
+  
+  .error-message p {
+    font-size: 14px;
+  }
+  
+  .refresh-button {
+    padding: 6px 16px;
+    font-size: 12px;
+  }
+}
+
+/* InfiniteScroll Container */
+.template-scroll-container {
+  width: 100%;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  height: calc(100vh - 300px);
+  min-height: 500px;
+  padding-bottom: 120px; /* Increased to make room for bottom loader */
+  position: relative;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
+}
+
+.infinite-scroll-component {
+  overflow-y: visible !important;
+  overflow-x: hidden;
+  min-height: 200px;
+  width: 100% !important;
+}
+
+.infinite-scroll-component__outerdiv {
+  width: 100%;
+}
+
+/* Circular loading spinner for infinite scroll */
+.circular-loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 30px 0;
+  margin: 20px 0 40px;
+  clear: both;
+}
+
+.circular-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px 30px;
+  border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.spinner {
+  animation: rotate 2s linear infinite;
+  width: 40px;
+  height: 40px;
+}
+
+.path {
+  stroke: #1976d2;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+.loading-text {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+/* Scroll detector - invisible element at bottom that triggers loading */
+.scroll-detector {
+  width: 100%;
+  height: 200px;
+  visibility: hidden;
+  position: absolute;
+  bottom: 200px;
+  left: 0;
+  pointer-events: all;
+  z-index: 100;
+}
+
+/* End message style with better visibility */
+.end-message {
+  text-align: center;
+  margin: 30px 0;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: #f0f8ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #333;
+  font-weight: 500;
+  width: 100%;
+  clear: both;
+}
+
+.end-message p {
+  font-size: 16px;
+  margin: 0;
+  color: #1976d2;
+}
+
+/* Error message style */
+.error-message {
+  text-align: center;
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  color: #333;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.5s ease;
+}
+
+.error-message .refresh-icon {
+  color: #ea4335;
+  margin-bottom: 16px;
+  animation: spin 3s infinite linear paused;
+}
+
+.error-message:hover .refresh-icon {
+  animation-play-state: running;
+}
+
+.error-message p {
+  font-size: 16px;
+  margin: 0 0 20px 0;
+  color: #666;
+}
+
+.refresh-button {
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.2);
+}
+
+.refresh-button:hover {
+  background: #1565c0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+}
+
+.refresh-button:active {
+  transform: translateY(0);
+}
+
+/* No results message style */
+.no-results-message {
+  width: 100%;
+  padding: 40px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Animation keyframes */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media queries for responsive grid */
+@media (max-width: 1400px) {
+  .template-grid-five {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1100px) {
+  .template-grid-five {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .template-grid-five {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 12px;
+  }
+  
+  .circular-loader-container {
+    padding: 8px 16px;
+  }
+  
+  .end-message {
+    padding: 10px;
+  }
+  
+  .end-message p {
+    font-size: 14px;
+  }
+  
+  .error-message {
+    padding: 20px;
+    margin: 30px auto;
+  }
+  
+  .refresh-button {
+    padding: 8px 20px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .template-grid-five {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  
+  .error-message {
+    padding: 15px;
+    margin: 20px auto;
+  }
+  
+  .error-message p {
+    font-size: 14px;
+  }
+  
+  .refresh-button {
+    padding: 6px 16px;
+    font-size: 12px;
+  }
+}
+
+/* InfiniteScroll Container */
+.template-scroll-container {
+  width: 100%;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  height: calc(100vh - 300px);
+  min-height: 500px;
+  padding-bottom: 120px; /* Increased to make room for bottom loader */
+  position: relative;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
+}
+
+.infinite-scroll-component {
+  overflow-y: visible !important;
+  overflow-x: hidden;
+  min-height: 200px;
+  width: 100% !important;
+}
+
+.infinite-scroll-component__outerdiv {
+  width: 100%;
+}
+
+/* Circular loading spinner for infinite scroll */
+.circular-loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 30px 0;
+  margin: 20px 0 40px;
+  clear: both;
+}
+
+.circular-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px 30px;
+  border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.spinner {
+  animation: rotate 2s linear infinite;
+  width: 40px;
+  height: 40px;
+}
+
+.path {
+  stroke: #1976d2;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+.loading-text {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+/* Scroll detector - invisible element at bottom that triggers loading */
+.scroll-detector {
+  width: 100%;
+  height: 200px;
+  visibility: hidden;
+  position: absolute;
+  bottom: 200px;
+  left: 0;
+  pointer-events: all;
+  z-index: 100;
+}
+
+/* End message style with better visibility */
+.end-message {
+  text-align: center;
+  margin: 30px 0;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: #f0f8ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #333;
+  font-weight: 500;
+  width: 100%;
+  clear: both;
+}
+
+.end-message p {
+  font-size: 16px;
+  margin: 0;
+  color: #1976d2;
+}
+
+/* Error message style */
+.error-message {
+  text-align: center;
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  color: #333;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.5s ease;
+}
+
+.error-message .refresh-icon {
+  color: #ea4335;
+  margin-bottom: 16px;
+  animation: spin 3s infinite linear paused;
+}
+
+.error-message:hover .refresh-icon {
+  animation-play-state: running;
+}
+
+.error-message p {
+  font-size: 16px;
+  margin: 0 0 20px 0;
+  color: #666;
+}
+
+.refresh-button {
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.2);
+}
+
+.refresh-button:hover {
+  background: #1565c0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+}
+
+.refresh-button:active {
+  transform: translateY(0);
+}
+
+/* No results message style */
+.no-results-message {
+  width: 100%;
+  padding: 40px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Animation keyframes */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media queries for responsive grid */
+@media (max-width: 1400px) {
+  .template-grid-five {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1100px) {
+  .template-grid-five {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .template-grid-five {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 12px;
+  }
+  
+  .circular-loader-container {
+    padding: 8px 16px;
+  }
+  
+  .end-message {
+    padding: 10px;
+  }
+  
+  .end-message p {
+    font-size: 14px;
+  }
+  
+  .error-message {
+    padding: 20px;
+    margin: 30px auto;
+  }
+  
+  .refresh-button {
+    padding: 8px 20px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .template-grid-five {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  
+  .error-message {
+    padding: 15px;
+    margin: 20px auto;
+  }
+  
+  .error-message p {
+    font-size: 14px;
+  }
+  
+  .refresh-button {
+    padding: 6px 16px;
+    font-size: 12px;
+  }
+} 
