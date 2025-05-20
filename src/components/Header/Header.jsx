@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './Header.css';
 import { Menu, X, User, LogOut, Home, Settings, Info, Star, HelpCircle } from 'lucide-react';
 import { Popover } from '@headlessui/react';
-import logo from '../../assets/images/Logo.png';
+import logo from '../../assets/images/LOGO.png';
 import proIcon from '../../assets/images/Pro.png';
 import { LoginModal, RegisterModal } from '../Auth/AuthModals';
 import { Toaster } from 'react-hot-toast';
