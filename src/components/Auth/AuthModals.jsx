@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { X, Eye, EyeOff, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import './AuthModals.css';
-import Logo from '../../assets/images/Logo.png';
+import Logo from '../../assets/images/LOGO.png';
 import googleIcon from '../../assets/images/ggogle.png';
 import { motion } from 'framer-motion';
 import axios from 'axios';
