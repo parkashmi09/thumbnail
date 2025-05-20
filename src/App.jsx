@@ -66,6 +66,34 @@ const EditorWithKey = () => {
 function App() {
   useCustomFonts();
 
+  // Detect iOS devices and add appropriate class to body
+  useEffect(() => {
+    // More reliable iOS detection
+    const isIOS = () => {
+      return [
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod'
+      ].includes(navigator.platform)
+      // iOS 13+ detection
+      || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+    };
+    
+    if (isIOS()) {
+      document.body.classList.add('ios-device');
+    } else {
+      document.body.classList.add('non-ios-device');
+    }
+    
+    return () => {
+      document.body.classList.remove('ios-device');
+      document.body.classList.remove('non-ios-device');
+    };
+  }, []);
+
   return (
     <BrowserRouter>
       <CategoryProvider>

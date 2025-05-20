@@ -21,10 +21,8 @@
 }
 
 /* iOS specific height adjustment - 60px margin */
-@supports (-webkit-touch-callout: none) {
-  .canvas-editor {
-    height: calc(100vh - 60px);
-  }
+.ios-device .canvas-editor {
+  height: calc(100vh - 60px);
 }
 
 /* Override any Polotno container styles to ensure full width */
