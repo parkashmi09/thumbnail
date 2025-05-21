@@ -311,7 +311,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
                         >
                           {updating ? (
                             <>
-                              <Loader2 size={16} className="spinner" />
+                              {/* <Loader2 size={10} className="spinner" /> */}
                               <span>Updating...</span>
                             </>
                           ) : 'Update'}

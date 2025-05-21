@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
-import { User, Mail, Camera, X, Loader2 } from 'lucide-react';
+import { User, Mail, Camera, X, Loader2, Loader2Icon } from 'lucide-react';
 import Header from '../components/Header/Header';
 import './ProfileSettings.css';
 
@@ -316,7 +316,7 @@ const ProfileSettings = () => {
                   >
                     {updating ? (
                       <>
-                        <Loader2 size={16} className="spinner" />
+                        {/* <Loader2Icon size={8} /> */}
                         <span>Updating...</span>
                       </>
                     ) : (
