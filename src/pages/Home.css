@@ -115,6 +115,15 @@ body {
   margin: 0 -12px;
 }
 
+@media (max-width: 400px) {
+  .carousel-items-wrapper {
+   
+    margin: 0 4px;
+  }
+}
+
+
+
 .carousel-items {
   display: flex;
   transition: transform 0.3s ease;
@@ -257,6 +266,7 @@ body {
   box-shadow: 0 4px 24px #0003;
   transform: translateY(-2px) scale(1.01);
 }
+
 
 .template-img {
   width: 100%;
@@ -902,7 +912,7 @@ body {
 
   .category-carousel {
     padding: 12px 0;
-    min-height: 90px;
+    min-height: 130px;
     border-radius: 10px;
   }
   
@@ -930,8 +940,8 @@ body {
   }
 
   .search-bar-floating {
-    width: 99vw;
-    padding: 2px 2px;
+    width: 60vw;
+    padding: 4px;
     font-size: 0.7rem;
   }
 

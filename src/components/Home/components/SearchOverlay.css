@@ -237,7 +237,7 @@
 
 @media (max-width: 400px) {
   .search-suggestions-overlay {
-    top: calc(100% + 10px);
+    top: calc(100% + 28px);
     border-radius: 10px;
     max-height: 240px;
   }
