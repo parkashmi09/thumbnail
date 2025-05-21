@@ -194,7 +194,7 @@
 /* Mobile optimizations */
 @media (max-width: 600px) {
   .search-suggestions-overlay {
-    top: calc(100% + 34px);
+    top: calc(100% + 54px);
     border-radius: 12px;
     max-height: 280px;
     min-height: 100px;
