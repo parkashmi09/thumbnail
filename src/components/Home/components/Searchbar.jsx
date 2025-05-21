@@ -46,9 +46,28 @@ const SearchBar = ({ onSearch }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
   const searchRef = useRef(null);
   const searchBarRef = useRef(null);
   const [overlayWidth, setOverlayWidth] = useState(0);
+  
+  // Check if viewport is mobile size
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth <= 600);
+    };
+    
+    // Initial check
+    checkIsMobile();
+    
+    // Add event listener
+    window.addEventListener('resize', checkIsMobile);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
   
   // Update overlay width when search bar resizes
   useEffect(() => {
@@ -157,7 +176,7 @@ const SearchBar = ({ onSearch }) => {
       <div className="search-bar search-bar-floating" ref={searchBarRef}>
         <input 
           type="text" 
-          placeholder="Search templates..." 
+          placeholder={isMobile ? "Search..." : "Search templates..."} 
           value={searchTerm}
           onChange={handleSearch}
           onFocus={() => searchTerm.length >= 1 && setShowSuggestions(true)}
@@ -165,12 +184,12 @@ const SearchBar = ({ onSearch }) => {
         <span className="search-icon">
           {searchTerm ? (
             <X 
-              size={20} 
+              size={isMobile ? 18 : 20} 
               className="clear-search-icon" 
               onClick={handleClearSearch}
             />
           ) : (
-            <Search size={22} />
+            <Search size={isMobile ? 18 : 22} />
           )}
         </span>
       </div>

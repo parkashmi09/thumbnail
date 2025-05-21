@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCategory } from '../../../context/CategoryContext.jsx';
 
-const MOBILE_BREAKPOINT = 900;
+const MOBILE_BREAKPOINT = 600; // Reduced breakpoint for better mobile detection
 
 const LoadingSkeleton = () => {
   return (
@@ -22,8 +22,7 @@ const LoadingSkeleton = () => {
   );
 };
 
-const CategoryCarousel = ({ categories }) => {
-  console.log(categories);
+const CategoryCarousel = ({ categories, onCategoryChange }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= MOBILE_BREAKPOINT);
   const [currentIndex, setCurrentIndex] = useState(3); // Start at first real item
   const [isTransitioning, setIsTransitioning] = useState(true);
@@ -53,14 +52,16 @@ const CategoryCarousel = ({ categories }) => {
 
   // Responsive
   useEffect(() => {
-    setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
-    setCurrentIndex(3); // Reset to first real item on resize
-  }, [window.innerWidth]);
-
-  useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
+      const mobile = window.innerWidth <= MOBILE_BREAKPOINT;
+      setIsMobile(mobile);
+      // Reset to first real item on resize
+      setCurrentIndex(3);
     };
+    
+    // Initial check
+    handleResize();
+    
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -69,9 +70,9 @@ const CategoryCarousel = ({ categories }) => {
   useEffect(() => {
     if (!isMobile) return;
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => prevIndex + itemsPerView);
+      setCurrentIndex((prevIndex) => prevIndex + 1); // Move by 1 item instead of itemsPerView for smoother scrolling
       setIsTransitioning(true);
-    }, 2000);
+    }, 3000);
     return () => clearInterval(interval);
   }, [isMobile, itemsPerView]);
 
@@ -120,12 +121,12 @@ const CategoryCarousel = ({ categories }) => {
   }, [currentIndex, isMobile, itemsPerView, isTransitioning]);
 
   const handlePrev = () => {
-    setCurrentIndex((prevIndex) => prevIndex - itemsPerView);
+    setCurrentIndex((prevIndex) => prevIndex - (isMobile ? 1 : itemsPerView)); // Move by 1 on mobile
     setIsTransitioning(true);
   };
 
   const handleNext = () => {
-    setCurrentIndex((prevIndex) => prevIndex + itemsPerView);
+    setCurrentIndex((prevIndex) => prevIndex + (isMobile ? 1 : itemsPerView)); // Move by 1 on mobile
     setIsTransitioning(true);
   };
 
@@ -141,7 +142,7 @@ const CategoryCarousel = ({ categories }) => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <ChevronLeft size={42} />
+        <ChevronLeft size={isMobile ? 24 : 42} />
       </motion.button>
       <div className="carousel-items-wrapper" ref={wrapperRef}>
         <motion.div
@@ -153,7 +154,10 @@ const CategoryCarousel = ({ categories }) => {
               className="category-item"
               key={`${cat.label}-${cat.id}-${index}`}
               ref={index === 3 ? itemRef : null}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => {
+                setSelectedCategory(cat)
+                onCategoryChange(cat)
+              }}
               style={{ cursor: 'pointer' }}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -173,7 +177,7 @@ const CategoryCarousel = ({ categories }) => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <ChevronRight size={42} />
+        <ChevronRight size={isMobile ? 24 : 42} />
       </motion.button>
     </div>
   );

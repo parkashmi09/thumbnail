@@ -7,12 +7,14 @@ import logo from '../../assets/images/LOGO.png';
 import proIcon from '../../assets/images/Pro.png';
 import { LoginModal, RegisterModal } from '../Auth/AuthModals';
 import { Toaster } from 'react-hot-toast';
+import ProfileModal from '../ProfileModal/ProfileModal';
 
 const Header = () => {
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const drawerRef = useRef(null);
@@ -109,6 +111,11 @@ const Header = () => {
     closeDrawer();
   };
 
+  const goToProfile = () => {
+    setIsProfileModalOpen(true);
+    closeDrawer();
+  };
+
   const handleOpenLogin = () => {
     closeDrawer();
     setIsLoginOpen(true);
@@ -134,7 +141,7 @@ const Header = () => {
           )}
           <div className="logo-text">
             <p className="title mobile-visible">
-              THUMBNAIL <span style={{ color: '#00291b' }}>GURU</span>
+              THUMBNAIL <span style={{ color: '#00291b', fontFamily:'Sunborn SansOne' }}>GURU</span>
             </p>
           </div>
         </div>
@@ -171,7 +178,7 @@ const Header = () => {
                         <span>NEWUSER</span>
                       </div>
                       <div className="panel-content">
-                        <button className="panel-item">
+                        <button className="panel-item" onClick={goToProfile}>
                           <User size={18} />
                           <span>Profile Settings</span>
                         </button>
@@ -263,7 +270,7 @@ const Header = () => {
                   <Home size={20} />
                   <span>Home</span>
                 </button>
-                <button className="drawer-item">
+                <button className="drawer-item" onClick={goToProfile}>
                   <Settings size={20} />
                   <span>Profile Settings</span>
                 </button>
@@ -346,6 +353,10 @@ const Header = () => {
       <RegisterModal 
         isOpen={isRegisterOpen} 
         onClose={() => setIsRegisterOpen(false)} 
+      />
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
       />
     </div>
   );

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Gotu&family=Inter:wght@400;500;600;700&family=Rasa:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
 /* Reset and Base Styles */
 * {
   margin: 0;
@@ -8,6 +10,7 @@
 .header-container {
   position: relative;
   width: 100%;
+  font-family: 'Rasa', sans-serif;
 }
 
 .home-header {
@@ -18,7 +21,7 @@
   background-color: #fff;
   border-bottom: 1px solid #333;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  font-family: "Sunborn SansOne", Arial, sans-serif;
+  font-family: 'Rasa', sans-serif;
 }
 
 /* Logo Container */

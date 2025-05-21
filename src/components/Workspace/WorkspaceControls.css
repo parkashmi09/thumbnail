@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Gotu&family=Inter:wght@400;500;600;700&family=Rasa:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
 /* Page Controls Styles */
 .page-controls {
   background: white;
@@ -7,6 +9,7 @@
   display: flex;
   gap: 16px;
   align-items: center;
+  font-family: 'Rasa', sans-serif;
 }
 
 .page-info {
@@ -17,7 +20,7 @@
 .page-dimensions {
   font-size: 13px;
   color: #666;
-  font-family: monospace;
+  font-family: 'Rasa', sans-serif;
 }
 
 .page-actions {

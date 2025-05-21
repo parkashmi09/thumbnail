@@ -1,9 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Gotu&family=Inter:wght@400;500;600;700&family=Rasa:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
 .app-container {
   width: 100vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  font-family: 'Rasa', sans-serif;
 }
 
 .main-content {

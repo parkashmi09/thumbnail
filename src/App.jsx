@@ -102,6 +102,7 @@ function App() {
           <Route path="/editor/:templateId" element={<EditorWithKey />} />
           <Route path="/editor" element={<EditorWithKey />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </CategoryProvider>
     </BrowserRouter>

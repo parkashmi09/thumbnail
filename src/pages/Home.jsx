@@ -18,6 +18,7 @@ const Home = () => {
   const [searching, setSearching] = useState(false);
   const [accordionState, setAccordionState] = useState({});
   const { selectedCategory, setSelectedCategory } = useCategory();
+  const [categoryId, setCategoryId] = useState("");
   const [categories, setCategories] = useState([]);
   const [rawCategories, setRawCategories] = useState([]);
   const [isDesignModalOpen, setIsDesignModalOpen] = useState(false);
@@ -61,7 +62,7 @@ const Home = () => {
       if (searchTerm) setSearching(true);
     }
     
-    let url = `https://thumnail-maker.onrender.com/api/v1/get/templates?page=${pageNum}&limit=${LIMIT}`;
+    let url = `https://thumnail-maker.onrender.com/api/v1/get/templates?page=${pageNum}&limit=${LIMIT}&categoryId=${categoryId}`;
     
     // Add search term if provided
     if (searchTerm) {
@@ -105,13 +106,15 @@ const Home = () => {
       setLoading(false);
       setSearching(false);
     }
-  }, [searchTerm, selectedSubCategory, LIMIT]);
+  }, [searchTerm, selectedSubCategory, LIMIT, categoryId]);
 
-  // Initial fetch
+  // Initial fetch and fetch when categoryId changes
   useEffect(() => {
-    setPage(1); // Ensure page is 1 for initial fetch
+    setPage(1); // Reset to page 1
+    setTemplates([]); // Clear existing templates when category changes
+    setLoading(true); // Set loading state
     fetchTemplates(1, true);
-  }, [fetchTemplates, searchTerm, selectedSubCategory]); // Add dependencies to trigger refetch
+  }, [fetchTemplates, searchTerm, selectedSubCategory, categoryId]); // Added categoryId to dependencies
 
   // Load more templates for infinite scroll
   const loadMoreTemplates = useCallback(() => {
@@ -191,7 +194,13 @@ const Home = () => {
 
   const goToPricing = () => navigate('/pricing');
   const goToEditor = () => setIsDesignModalOpen(true);
-
+  const handleCategoryChange = (category) => {
+    console.log(category, "category");
+    setSelectedCategory(category); // Set the selected category
+    setTemplates([]); // Clear templates immediately when category changes
+    setLoading(true); // Set loading state
+    setCategoryId(category.id);
+  };
   return (
     <div className="home-layout">
       <div className="home-root">
@@ -201,7 +210,7 @@ const Home = () => {
         <div className="fixed-top-section">
           {/* Carousel and Search */}
           <div className="carousel-wrapper">
-            <CategoryCarousel categories={categories} />
+            <CategoryCarousel categories={categories} onCategoryChange={handleCategoryChange} />
             <Searchbar onSearch={handleSearch} />
           </div>
           
@@ -213,7 +222,7 @@ const Home = () => {
         </div>
         
         {/* Scrollable content area */}
-        <div className="scrollable-content">
+        <div className="">
           <div className="home-wrapper">
             {/* Category Sidebar */}
             {selectedCategory && selectedCategoryObj && (
