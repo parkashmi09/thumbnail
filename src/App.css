@@ -1,12 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Gotu&family=Inter:wght@400;500;600;700&family=Rasa:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
-
 .app-container {
   width: 100vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  font-family: 'Rasa', sans-serif;
 }
 
 .main-content {
@@ -17,21 +14,24 @@
 /* Default for Android and other devices - 120px margin */
 .canvas-editor {
   width: 100%;
-  height: calc(100vh - 110px);
+  height: calc(100vh - 100px);
   position: absolute;
   top: 0;
   left: 0;
 }
 
-
+/* iOS specific height adjustment - 60px margin */
+.ios-device .canvas-editor {
+  height: calc(100vh - 60px);
+}
 @media only screen and (max-width: 767px) {
   .ios-device .canvas-editor {
-    height: calc(100vh - 60px);
+    height: calc(100vh - 120px);
   }
 }
 @media only screen and (max-width: 767px) {
   .canvas-editor {
-    height: calc(100vh - 45px);
+    height: calc(100vh - 120px);
   }
 }
 /* Override any Polotno container styles to ensure full width */
