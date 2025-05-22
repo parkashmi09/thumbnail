@@ -11,30 +11,32 @@
   position: relative;
   width: 100%;
   font-family: 'Rasa', sans-serif;
+  max-height: 50px; /* Max height for web view */
 }
 
 .home-header {
   display: flex;
-  justify-content: space-between; /* Ensure space-between for all views */
+  justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  padding: 5px 10px;
   background-color: #fff;
   border-bottom: 1px solid #333;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   font-family: 'Rasa', sans-serif;
+  height: 50px; /* Fixed height for web view */
 }
 
 /* Logo Container */
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-right: auto; /* Ensures the logo stays on the left */
+  gap: 4px;
+  margin-right: auto;
 }
 
 .logo-image {
-  width: 50px;
-  height: 50px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 
@@ -44,10 +46,10 @@
 }
 
 .title {
-  font-size: 1.8rem;
+  font-size: 1.3rem;
   font-weight: bold;
   color: #00a67e;
-  margin-top: 12px;
+  margin-top: 6px;
   font-family: "Sunborn SansOne", Arial, sans-serif;
 }
 
@@ -55,35 +57,35 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
 }
 
 .pro-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .pro-icon {
-  width: 30px;
-  height: 30px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
 }
 
 .pricing {
   color: #4caf50;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .login-btn,
 .register-btn {
   border: none;
-  border-radius: 12px;
-  padding: 6px 16px;
+  border-radius: 8px;
+  padding: 4px 12px;
   font-weight: 600;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   transition: all 0.2s ease;
 }
 
@@ -111,7 +113,7 @@
   color: #4d4b4c;
   cursor: pointer;
   padding: 8px;
-  margin-left: auto; /* Ensures the menu toggle stays on the right */
+  margin-left: auto;
 }
 
 /* Mobile Drawer Redesign */
@@ -312,17 +314,22 @@
 
 /* Media Queries for Mobile View */
 @media (max-width: 900px) {
+  .header-container {
+    max-height: 45px; /* Reduced max height for mobile */
+  }
+
   .home-header {
-    padding: 10px 12px;
-    justify-content: space-between; /* Reinforce space-between for mobile */
+    padding: 5px 10px;
+    justify-content: space-between;
     align-items: center;
-    width: 100%; /* Ensure it takes full width */
+    width: 100%;
+    height: 45px; /* Fixed height for tablets */
   }
 
   .logo-container {
     justify-content: flex-start;
     margin-left: 0;
-    margin-right: auto; /* Ensure logo stays on the left */
+    margin-right: auto;
   }
 
   .logo-image {
@@ -332,19 +339,18 @@
   }
 
   .logo-text {
-    display: none; /* Hide the title text on mobile */
+    display: none;
   }
 
   .desktop-actions {
-    display: none; /* Hide desktop actions on mobile */
+    display: none;
   }
 
   .menu-toggle {
-    display: block; /* Show menu toggle on mobile */
-    margin-left: auto; /* Ensure it stays on the right */
+    display: block;
+    margin-left: auto;
   }
   
-  /* Ensure the drawer is displayed correctly on all screen sizes */
   .mobile-drawer {
     display: flex;
   }
@@ -355,14 +361,19 @@
 }
 
 @media (max-width: 600px) {
+  .header-container {
+    max-height: 40px; /* Further reduced max height for smaller mobile */
+  }
+  
   .home-header {
-    padding: 8px 10px;
-    justify-content: space-between; /* Reinforce space-between */
+    padding: 4px 8px;
+    justify-content: space-between;
+    height: 40px; /* Fixed height for mobile phones */
   }
   
   .logo-text {
-    display: block !important; /* Show title text on small mobile */
-    margin-bottom: -64px;
+    display: block !important;
+    margin-bottom: -47px;
   }
   
   .title {
@@ -376,6 +387,7 @@
     margin-left: auto;
     align-items: center;
     gap: 12px;
+    margin-top: -8px;
   }
 
   .logo-image {
@@ -386,9 +398,14 @@
 }
 
 @media (max-width: 400px) {
+  .header-container {
+    max-height: 35px; /* Smallest max height for very small screens */
+  }
+  
   .home-header {
-    padding: 6px 8px;
-    justify-content: space-between; /* Reinforce space-between */
+    padding: 3px 6px;
+    justify-content: space-between;
+    height: 35px; /* Fixed height for small mobile phones */
   }
 
   .logo-image {
@@ -515,15 +532,15 @@
 .user-button {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
+  gap: 6px;
+  padding: 6px 10px;
   background: linear-gradient(135deg, #ffffff, #f5f5f5);
   border: 1px solid #e0e0e0;
-  border-radius: 50px;
+  border-radius: 40px;
   cursor: pointer;
   outline: none;
   transition: all 0.25s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .user-button:hover {
@@ -537,12 +554,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 26px;
+  height: 26px;
   background: linear-gradient(135deg, #00a67e, #008064);
   border-radius: 50%;
   color: white;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
   position: relative;
   overflow: hidden;
 }
@@ -565,7 +582,7 @@
 .user-name {
   font-weight: 600;
   color: #333;
-  font-size: 15px;
+  font-size: 13px;
   letter-spacing: -0.01em;
 }
 
@@ -578,16 +595,16 @@
 
 .user-panel {
   position: absolute;
-  top: calc(100% + 15px);
+  top: calc(100% + 8px);
   right: 0;
-  width: 280px;
+  width: 240px;
   background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18), 0 0 1px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   z-index: 9999;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  animation: slideDown 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: slideDown 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   transform-origin: top right;
 }
 
@@ -603,47 +620,47 @@
 }
 
 .panel-header {
-  padding: 20px;
+  padding: 12px;
   background: linear-gradient(135deg, #00a67e, #008064);
   font-weight: 600;
   color: white;
-  font-size: 16px;
+  font-size: 14px;
   position: relative;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
   border-bottom: none;
 }
 
 .panel-header::before {
   content: '';
   position: absolute;
-  right: 20px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
+  width: 24px;
+  height: 24px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
 }
 
 .panel-content {
-  padding: 16px;
+  padding: 8px;
   background: #ffffff;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .panel-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
-  padding: 12px 16px;
+  padding: 8px 10px;
   background: transparent;
   border: none;
-  border-radius: 10px;
+  border-radius: 6px;
   color: #333;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -668,32 +685,32 @@
   height: 1px;
   width: 100%;
   background: #f0f0f0;
-  margin: 8px 0;
+  margin: 4px 0;
 }
 
 .logout-button {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
-  padding: 14px 20px;
+  padding: 8px 12px;
   background: #fff5f5;
   border: 1px solid #ffd5d5;
-  border-radius: 12px;
+  border-radius: 8px;
   color: #e53e3e;
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 600;
   text-align: left;
   cursor: pointer;
   transition: all 0.25s ease;
   position: relative;
   overflow: hidden;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .logout-button svg {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   transition: transform 0.3s ease;
 }
 
