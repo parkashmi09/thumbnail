@@ -486,6 +486,23 @@ const Editor = () => {
   const designType = stateData.type || 'Custom';
   const useMagic = stateData.useMagic || false;
 
+  // Get routingData from location state or sessionStorage
+  const routingData = stateData.routingData || 
+    (sessionStorage.getItem('templateRoutingData') 
+      ? JSON.parse(sessionStorage.getItem('templateRoutingData')) 
+      : null);
+
+
+
+  console.log(routingData, "routingData");
+  
+  // Clear sessionStorage after retrieving the data
+  useEffect(() => {
+    if (sessionStorage.getItem('templateRoutingData')) {
+      sessionStorage.removeItem('templateRoutingData');
+    }
+  }, []);
+
   useEffect(() => {
     // Set page size with dimensions from router state
     if (width > 0 && height > 0) {
@@ -515,7 +532,28 @@ const Editor = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`https://thumnail-maker.onrender.com/api/v1/templates/${templateId}`);
+        // Add routingData to API request if available
+        let url = `https://thumnail-maker.onrender.com/api/v1/templates/${templateId}`;
+        
+        // If routingData exists, add it as query parameters
+        if (routingData) {
+          const queryParams = new URLSearchParams();
+          
+          if (routingData.type === 'subCategories' && routingData.data && routingData.data.length > 0) {
+            // For subcategories, use the first subcategory ID
+            queryParams.append('subCategoryId', routingData.data[0]._id);
+          } else if (routingData.type === 'category' && routingData.data) {
+            // For category only, use the category ID
+            queryParams.append('categoryId', routingData.data._id);
+          }
+          
+          // Append query parameters if any were added
+          if (queryParams.toString()) {
+            url += `?${queryParams.toString()}`;
+          }
+        }
+        
+        const res = await fetch(url);
         if (!res.ok) throw new Error('Template not found');
         const tpl = await res.json();
         if (tpl.jsonPath) {
@@ -540,11 +578,15 @@ const Editor = () => {
       // This will create a blank canvas with dimensions from URL params
       setLoading(false);
     }
-  }, [templateId, store]);
+  }, [templateId, store, routingData]);
 
   // Update sections to include ResizePanel and RemoveBackgroundSection
   const sections = [
-    { ...TemplatesSection, templateId },
+    { 
+      ...TemplatesSection, 
+      templateId,
+      Panel: (props) => <TemplatesSection.Panel {...props} routingData={routingData} />
+    },
     CustomElements,
     ResizePanel,
     RemoveBackgroundSection,

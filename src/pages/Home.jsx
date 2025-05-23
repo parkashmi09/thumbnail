@@ -77,15 +77,32 @@ const Home = () => {
     try {
       const res = await fetch(url);
       const data = await res.json();
+
+      console.log(data, "data");
+      
+      const templatesData = data.templates || [];
+      
+      // Process each template to determine routing data
+      const processedTemplates = templatesData.map(template => {
+        // If template has subcategories (array with items), use subcategories for routing
+        // Otherwise, use category data for routing
+        const routingData = template.subCategories && template.subCategories.length > 0 
+          ? { type: 'subCategories', data: template.subCategories }
+          : { type: 'category', data: template.category };
+          
+        return {
+          ...template,
+          routingData
+        };
+      });
       
       setTemplates(prevTemplates => {
-        const newApiTemplates = data.templates || [];
         if (reset || pageNum === 1) {
-          return newApiTemplates; // Completely replace for reset or first page
+          return processedTemplates; // Completely replace for reset or first page
         } else {
           // Deduplicate incoming templates against previous ones before appending
           const existingIds = new Set(prevTemplates.map(t => t._id));
-          const uniqueNewTemplates = newApiTemplates.filter(t => !existingIds.has(t._id));
+          const uniqueNewTemplates = processedTemplates.filter(t => !existingIds.has(t._id));
           return [...prevTemplates, ...uniqueNewTemplates];
         }
       });
@@ -108,13 +125,12 @@ const Home = () => {
     }
   }, [searchTerm, selectedSubCategory, LIMIT, categoryId]);
 
-  // Initial fetch and fetch when categoryId changes
+  // Initial fetch and fetch when dependencies change
   useEffect(() => {
     setPage(1); // Reset to page 1
     setTemplates([]); // Clear existing templates when category changes
-    setLoading(true); // Set loading state
     fetchTemplates(1, true);
-  }, [fetchTemplates, searchTerm, selectedSubCategory, categoryId]); // Added categoryId to dependencies
+  }, [fetchTemplates]);
 
   // Load more templates for infinite scroll
   const loadMoreTemplates = useCallback(() => {
@@ -194,13 +210,26 @@ const Home = () => {
 
   const goToPricing = () => navigate('/pricing');
   const goToEditor = () => setIsDesignModalOpen(true);
+  
   const handleCategoryChange = (category) => {
     console.log(category, "category");
     setSelectedCategory(category); // Set the selected category
     setTemplates([]); // Clear templates immediately when category changes
     setLoading(true); // Set loading state
     setCategoryId(category.id);
+    // Explicitly trigger a fetch when category changes
+    setPage(1);
+    setSelectedSubCategory(null);
+    setSearchTerm("");
   };
+
+  // Force refetch when categoryId changes
+  useEffect(() => {
+    if (categoryId) {
+      fetchTemplates(1, true);
+    }
+  }, [categoryId]);
+
   return (
     <div className="home-layout">
       <div className="home-root">
@@ -245,13 +274,13 @@ const Home = () => {
             
             {/* Templates Grid */}
             <div className="template-grid-container">
-            
               <TemplatesGrid 
                 templates={templates} 
                 loading={loading}
                 hasMore={hasMore}
                 onLoadMore={loadMoreTemplates}
                 isSearching={searching}
+                key={categoryId || 'default'} // Add key to force re-render when categoryId changes
               />
             </div>
           </div>

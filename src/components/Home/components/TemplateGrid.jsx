@@ -116,13 +116,18 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
     setShowAuthModal(false);
     // Redirect to editor with the template ID
     if (selectedTemplate) {
+      // Using navigate would be better, but for a direct redirect:
       window.location.href = `/editor/${selectedTemplate._id}`;
+      // Store routingData in sessionStorage for access after redirect
+      if (selectedTemplate.routingData) {
+        sessionStorage.setItem('templateRoutingData', JSON.stringify(selectedTemplate.routingData));
+      }
     }
   };
 
   // Show auth modal when a template is clicked and user is not logged in
-  const openAuthModal = (templateId) => {
-    setSelectedTemplate({ _id: templateId });
+  const openAuthModal = (template) => {
+    setSelectedTemplate(template);
     setShowAuthModal(true);
   };
 
@@ -173,6 +178,7 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
           {templates && templates.map((tpl, index) => (
             <Link
               to={`/editor/${tpl._id}`}
+              state={{ routingData: tpl.routingData }}
               className="template-card"
               key={tpl._id}
               style={{ 

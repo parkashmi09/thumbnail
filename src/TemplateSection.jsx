@@ -9,33 +9,67 @@ const getImageUrl = (path) => {
   return `${path}?_=${new Date().getTime()}`;
 };
 
-export const TemplatesPanel = observer(({ store }) => {
-  const [category, setCategory] = useState('All'); // Default category
+export const TemplatesPanel = observer(({ store, routingData }) => {
+  console.log(routingData, "routingData^^^^");
   const [templates, setTemplates] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [categoryName, setCategoryName] = useState('All Templates');
+  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState('');
 
-  // Fetch templates from API based on category
+  // Set initial subcategory ID when routingData changes
+  useEffect(() => {
+    if (routingData && routingData.type === 'subCategories' && routingData.data && routingData.data.length > 0) {
+      // Set the initial subcategory to the first one in the array
+      setSelectedSubCategoryId(routingData.data[0]._id);
+      setCategoryName(routingData.data[0].subCategoryName || 'Templates');
+    } else if (routingData && routingData.type === 'category' && routingData.data) {
+      setCategoryName(routingData.data.categoryName || 'Templates');
+    }
+  }, [routingData]);
+
+  // Fetch templates based on selected subcategory
   useEffect(() => {
     const fetchTemplates = async () => {
+      if (!selectedSubCategoryId && (!routingData || !routingData.data)) {
+        console.log("No subcategory ID or routing data available");
+        return;
+      }
+
       setIsLoading(true);
       try {
-        const url = category === 'All' 
-          ? '/api/templates' 
-          : `/api/templates/category/${category}`;
+        let url = 'https://thumnail-maker.onrender.com/api/v1/get/templates';
         
-        const res = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
+        // Use selected subcategory ID if available, otherwise use the first from routingData
+        if (selectedSubCategoryId) {
+          url += `?subCategoryId=${selectedSubCategoryId}`;
+        } else if (routingData.type === 'category' && routingData.data) {
+          url += `?categoryId=${routingData.data._id}`;
+        }
+        
+        console.log("Fetching templates from:", url);
+        
+        const res = await fetch(url);
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
 
         const data = await res.json();
-        setTemplates(data);
+        console.log("Templates data:", data);
+        
+        // Map API response to template format
+        if (data && data.templates) {
+          const templatesData = data.templates.map(template => ({
+            id: template._id,
+            name: template.name,
+            preview: template.previewPath,
+            json: template.jsonPath,
+            width: template.width,
+            height: template.height
+          }));
+          setTemplates(templatesData);
+        } else {
+          setTemplates([]);
+        }
       } catch (error) {
         console.error('Error fetching templates:', error);
         setTemplates([]);
@@ -45,83 +79,100 @@ export const TemplatesPanel = observer(({ store }) => {
     };
 
     fetchTemplates();
-  }, [category]);
+  }, [selectedSubCategoryId, routingData]);
 
-  // Define available categories
-  const categories = ['All', 'Instagram', 'YouTube'];
-
-  // Preload images with crossOrigin
-  useEffect(() => {
-    templates.forEach((template) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = getImageUrl(`/templates/${template.preview}`);
-    });
-  }, [templates]);
+  // Handle subcategory selection
+  const handleSubCategoryClick = (subCatId, subCatName) => {
+    setSelectedSubCategoryId(subCatId);
+    setCategoryName(subCatName);
+  };
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Category Selector */}
-      <div style={{ padding: '10px', borderBottom: '1px solid #ddd', display: 'flex', gap: '10px' }}>
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setCategory(cat)}
-            style={{
-              padding: '5px 10px',
-              background: category === cat ? 'linear-gradient(90deg, #00291b 0%, #00a67e 100%)' : '#fff',
-              color: category === cat ? '#fff' : '#000',
-              border: '1px solid #007bff',
-              borderRadius: '5px',
-              cursor: 'pointer',
-            }}
-          >
-            {cat}
-          </button>
-        ))}
+      {/* Category Header */}
+      <div style={{ 
+        padding: '15px', 
+        borderBottom: '1px solid #ddd', 
+        background: 'linear-gradient(90deg, #00291b 0%, #00a67e 100%)',
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center'
+      }}>
+        {categoryName}
       </div>
 
+      {/* SubCategories Selector - Show only if multiple subcategories exist */}
+      {routingData && routingData.type === 'subCategories' && routingData.data && routingData.data.length > 1 && (
+        <div style={{ padding: '10px', borderBottom: '1px solid #ddd', overflowX: 'auto' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {routingData.data.map((subCat) => (
+              <button
+                key={subCat._id}
+                onClick={() => handleSubCategoryClick(subCat._id, subCat.subCategoryName)}
+                style={{
+                  padding: '5px 12px',
+                  background: selectedSubCategoryId === subCat._id 
+                    ? 'linear-gradient(90deg, #00291b 0%, #00a67e 100%)' 
+                    : '#f5f5f5',
+                  color: selectedSubCategoryId === subCat._id ? 'white' : '#333',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: selectedSubCategoryId === subCat._id ? 'bold' : 'normal',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {subCat.subCategoryName}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Templates Grid */}
-      <ImagesGrid
-        shadowEnabled={false}
-        images={templates}
-        getPreview={(item) => getImageUrl(`/templates/${item.preview}`)}
-        isLoading={isLoading}
-        onSelect={async (item) => {
-          try {
-            const req = await fetch(getImageUrl(`/templates/${item.json}`), {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            });
-
-            if (!req.ok) {
-              throw new Error(`HTTP error! status: ${req.status}`);
-            }
-
-            const json = await req.json();
-            
-            // Ensure all images in the template have crossOrigin set
-            if (json.objects) {
-              json.objects = json.objects.map(obj => {
-                if (obj.type === 'image') {
-                  return {
-                    ...obj,
-                    crossOrigin: 'anonymous',
-                  };
+      <div style={{ flex: 1, overflow: 'auto' }}>
+        {templates.length === 0 && !isLoading ? (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+            No templates found
+          </div>
+        ) : (
+          <ImagesGrid
+            shadowEnabled={false}
+            images={templates}
+            getPreview={(item) => item.preview}
+            isLoading={isLoading}
+            onSelect={async (item) => {
+              try {
+                console.log("Loading template JSON from:", item.json);
+                const req = await fetch(item.json);
+                if (!req.ok) {
+                  throw new Error(`HTTP error! status: ${req.status}`);
                 }
-                return obj;
-              });
-            }
-            
-            store.loadJSON(json);
-          } catch (error) {
-            console.error('Error loading template:', error);
-          }
-        }}
-        rowsNumber={1}
-      />
+                const json = await req.json();
+                
+                // Ensure all images in the template have crossOrigin set
+                if (json.objects) {
+                  json.objects = json.objects.map(obj => {
+                    if (obj.type === 'image') {
+                      return {
+                        ...obj,
+                        crossOrigin: 'anonymous',
+                      };
+                    }
+                    return obj;
+                  });
+                }
+                
+                store.loadJSON(json);
+              } catch (error) {
+                console.error('Error loading template:', error);
+              }
+            }}
+            rowsNumber={2}
+          />
+        )}
+      </div>
     </div>
   );
 });
@@ -130,7 +181,7 @@ export const TemplatesPanel = observer(({ store }) => {
 export const TemplatesSection = {
   name: 'all-templates',
   Tab: (props) => (
-    <SectionTab name="ALL Templates" {...props}>
+    <SectionTab name="Related Templates" {...props}>
       <MdPhotoLibrary />
     </SectionTab>
   ),
