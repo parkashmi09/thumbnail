@@ -45,6 +45,7 @@ const SearchBar = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
   const searchRef = useRef(null);
@@ -93,6 +94,19 @@ const SearchBar = ({ onSearch }) => {
       };
     }
   }, []);
+
+  // Set visibility with slight delay after showSuggestions changes
+  useEffect(() => {
+    if (showSuggestions) {
+      // Small delay to ensure DOM is ready for animation
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+      }, 10);
+      return () => clearTimeout(timer);
+    } else {
+      setIsVisible(false);
+    }
+  }, [showSuggestions]);
   
   // Debounce search using useCallback
   const debouncedSearch = useCallback((value) => {
@@ -181,7 +195,7 @@ const SearchBar = ({ onSearch }) => {
           onChange={handleSearch}
           onFocus={() => searchTerm.length >= 1 && setShowSuggestions(true)}
         />
-        <span className="search-icon">
+        <span className="search-icon-new">
           {searchTerm ? (
             <X 
               size={isMobile ? 18 : 20} 
@@ -196,7 +210,7 @@ const SearchBar = ({ onSearch }) => {
       
       {showSuggestions && (
         <div 
-          className="search-suggestions-overlay" 
+          className={`search-suggestions-overlay ${isVisible ? 'visible' : ''}`} 
           style={{ width: overlayWidth > 0 ? `${overlayWidth}px` : '100%' }}
         >
           {isLoading ? (

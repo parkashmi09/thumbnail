@@ -1,0 +1,361 @@
+.help-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.container {
+height: 100vh;
+overflow-y: auto;
+}
+
+.help-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.help-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.help-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #00291b, #00a86b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.help-header p {
+  font-size: 1.1rem;
+  color: #555;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.back-button {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: #00291b;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: rgba(0, 41, 27, 0.1);
+}
+
+.search-container {
+  position: relative;
+  max-width: 700px;
+  margin: 0 auto 3rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 1rem 1rem 1rem 3rem;
+  border-radius: 50px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #00a86b;
+  box-shadow: 0 4px 20px rgba(0, 168, 107, 0.15);
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #00a86b;
+}
+
+.help-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.help-section {
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.help-section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.section-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e6f7f1, #c5f1e1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  color: #00a86b;
+}
+
+.help-section h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #00291b;
+}
+
+.help-section ul {
+  padding-left: 1.5rem;
+  margin-bottom: 0;
+}
+
+.help-section li {
+  margin-bottom: 0.75rem;
+  color: #444;
+}
+
+.faq-item {
+  margin-bottom: 1.5rem;
+}
+
+.faq-item h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #00291b;
+}
+
+.faq-item p {
+  color: #555;
+  line-height: 1.6;
+}
+
+.tip-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.tip-card img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.tip-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #00291b;
+}
+
+.tip-content p {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.feature-item {
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.feature-item svg {
+  color: #00a86b;
+  margin-bottom: 0.75rem;
+}
+
+.feature-item h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #00291b;
+}
+
+.feature-item p {
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.upgrade-button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #00291b, #00a86b);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.upgrade-button:hover {
+  background: linear-gradient(135deg, #00291b, #008c59);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 168, 107, 0.2);
+}
+
+.help-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  background-color: white;
+  padding: 3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.contact-support {
+  text-align: center;
+}
+
+.contact-support h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #00291b;
+}
+
+.contact-support p {
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.contact-button {
+  padding: 0.75rem 2rem;
+  background-color: #00a86b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.contact-button:hover {
+  background-color: #008c59;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 168, 107, 0.2);
+}
+
+.help-resources h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #00291b;
+}
+
+.help-resources ul {
+  list-style: none;
+  padding: 0;
+}
+
+.help-resources li {
+  margin-bottom: 1rem;
+}
+
+.help-resources a {
+  color: #00a86b;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.help-resources a:hover {
+  color: #00291b;
+  text-decoration: underline;
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .help-sections {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .help-header h1 {
+    font-size: 2rem;
+  }
+  
+  .help-footer {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .tip-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .tip-card img {
+    width: 100%;
+    height: auto;
+    max-height: 200px;
+  }
+}
+
+@media (max-width: 576px) {
+  .help-container {
+    padding: 1.5rem 1rem 3rem;
+  }
+  
+  .help-header {
+    margin-bottom: 2rem;
+  }
+  
+  .back-button {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+  
+  .help-section {
+    padding: 1.5rem;
+  }
+  
+  .help-footer {
+    padding: 2rem 1.5rem;
+  }
+} 

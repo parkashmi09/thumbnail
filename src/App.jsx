@@ -6,7 +6,8 @@ import Home from './pages/Home';
 import { CategoryProvider } from './context/CategoryContext.jsx';
 import useCustomFonts from './hooks/useCustomFonts';
 import Editor from './pages/EditorPage.jsx';
-import Pricing from './pages/Pricing';
+import Help from './pages/Help';
+import AboutUs from './pages/AboutUs';
 import { LoginModal } from './components/Auth/AuthModals.jsx';
 
 // Auth protected route component
@@ -101,7 +102,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/editor/:templateId" element={<EditorWithKey />} />
           <Route path="/editor" element={<EditorWithKey />} />
-          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/about" element={<AboutUs />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </CategoryProvider>

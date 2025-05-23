@@ -398,16 +398,17 @@ const OtpLoginForm = memo(({ handleSendOtp, handleVerifyOtp, showOtp, otpValue, 
 ));
 
 // Registration form component
-const RegistrationForm = memo(({ handleSubmit, isLoading }) => (
+const RegistrationForm = memo(({ handleSubmit, isLoading, prefillMobile }) => (
   <Formik
     initialValues={{
       name: '',
       email: '',
-      mobile: '',
+      mobile: prefillMobile || '',
       password: '',
     }}
     validationSchema={RegisterSchema}
     onSubmit={handleSubmit}
+    enableReinitialize={true}
   >
     {({ errors, touched, isSubmitting }) => (
       <Form className="auth-form">
@@ -449,12 +450,16 @@ const RegistrationForm = memo(({ handleSubmit, isLoading }) => (
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.29, duration: 0.4 }}
         >
-          <Field
-            name="mobile"
-            type="tel"
-            placeholder="Mobile Number"
-            className="form-input"
-          />
+          <div className="phone-input-wrapper">
+            <span className="country-code">+91</span>
+            <Field
+              name="mobile"
+              type="tel"
+              placeholder="Phone Number"
+              className="form-input phone-input"
+              maxLength={10}
+            />
+          </div>
           {errors.mobile && touched.mobile && (
             <div className="error">{errors.mobile}</div>
           )}
@@ -528,14 +533,49 @@ export const LoginModal = ({ isOpen, onClose, redirectAfterLogin, onLoginSuccess
         
         toast.success(response.data.message || 'OTP sent successfully!');
       } else {
-        toast.error(response.data.message || 'Failed to send OTP');
+        // If mobile number not registered, show registration form
+        if (response.data.isRegistered === false) {
+          setMobileNumber(phone);
+          setIsRegistered(false);
+          
+          // Switch to register mode with the phone number pre-filled
+          setMode('register');
+          setTimeout(() => {
+            // Pre-fill the mobile number in registration form
+            const registerForm = document.querySelector('form.auth-form [name="mobile"]');
+            if (registerForm) {
+              registerForm.value = phone;
+            }
+          }, 100);
+          
+          toast.info("Mobile number not registered. Please create an account.");
+        } else {
+          toast.error(response.data.message || 'Failed to send OTP');
+        }
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to send OTP');
+      if (error.response?.data?.isRegistered === false) {
+        setMobileNumber(phone);
+        setIsRegistered(false);
+        
+        // Switch to register mode with the phone number pre-filled
+        setMode('register');
+        setTimeout(() => {
+          // Pre-fill the mobile number in registration form
+          const registerForm = document.querySelector('form.auth-form [name="mobile"]');
+          if (registerForm) {
+            registerForm.value = phone;
+          }
+        }, 100);
+        
+        toast.info("Mobile number not registered. Please create an account.");
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to send OTP');
+      }
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [setMode]);
 
   // Verify OTP
   const handleVerifyOtp = useCallback(async (values) => {
@@ -613,7 +653,7 @@ export const LoginModal = ({ isOpen, onClose, redirectAfterLogin, onLoginSuccess
         userName: values.name,
         email: values.email,
         password: values.password,
-        mobileNumber: values.mobile
+        mobileNumber: values.mobile || mobileNumber // Use the mobile number from OTP if available
       });
       
       toast.success(response.data.message || 'Registration successful!');
@@ -650,7 +690,7 @@ export const LoginModal = ({ isOpen, onClose, redirectAfterLogin, onLoginSuccess
     } finally {
       setIsLoading(false);
     }
-  }, [onClose]);
+  }, [onClose, mobileNumber]);
   
   // Final close handler (after success)
   const handleFinalClose = useCallback(() => {
@@ -773,6 +813,7 @@ export const LoginModal = ({ isOpen, onClose, redirectAfterLogin, onLoginSuccess
               <RegistrationForm 
                 handleSubmit={handleRegistration}
                 isLoading={isLoading}
+                prefillMobile={mobileNumber}
               />
               
               <div className="mode-switch-text">

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Header.css';
-import { Menu, X, User, LogOut, Home, Settings, Info, Star, HelpCircle } from 'lucide-react';
+import { Menu, X, User, LogOut, Home, Settings, Info, Star, HelpCircle, Crown } from 'lucide-react';
 import { Popover } from '@headlessui/react';
 import logo from '../../assets/images/LOGO.png';
-import proIcon from '../../assets/images/Pro.png';
 import { LoginModal, RegisterModal } from '../Auth/AuthModals';
 import { Toaster } from 'react-hot-toast';
 import ProfileModal from '../ProfileModal/ProfileModal';
+import PricingModal from '../PricingModal/PricingModal';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -15,6 +15,7 @@ const Header = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const drawerRef = useRef(null);
@@ -101,8 +102,8 @@ const Header = () => {
     setIsDrawerOpen(false);
   };
   
-  const goToPricing = () => {
-    navigate('/pricing');
+  const openPricingModal = () => {
+    setIsPricingModalOpen(true);
     closeDrawer();
   };
 
@@ -113,6 +114,16 @@ const Header = () => {
 
   const goToProfile = () => {
     setIsProfileModalOpen(true);
+    closeDrawer();
+  };
+
+  const goToHelp = () => {
+    navigate('/help');
+    closeDrawer();
+  };
+
+  const goToAbout = () => {
+    navigate('/about');
     closeDrawer();
   };
 
@@ -149,14 +160,16 @@ const Header = () => {
         {/* Desktop Actions - Only shown on larger screens */}
         {!isMobile && (
           <div className="header-actions desktop-actions">
-            <div 
-              className="pro-container"
-              onClick={goToPricing}
-              style={{ cursor: 'pointer' }}
+            <button 
+              className="pro-button"
+              onClick={openPricingModal}
             >
-              <img src={proIcon} alt="Pro Icon" className="pro-icon" />
-              <span className="pricing">GET PRO</span>
-            </div>
+              <div className="pro-button-content">
+                <Crown size={16} className="crown-icon" />
+                <span>Upgrade Pro</span>
+                <div className="discount-badge">20% OFF</div>
+              </div>
+            </button>
             
             {user ? (
               <Popover className="user-popover">
@@ -175,7 +188,7 @@ const Header = () => {
 
                     <Popover.Panel className="user-panel">
                       <div className="panel-header">
-                        <span>NEWUSER</span>
+                        <span>{user.name}</span>
                       </div>
                       <div className="panel-content">
                         <button className="panel-item" onClick={goToProfile}>
@@ -183,12 +196,12 @@ const Header = () => {
                           <span>Profile Settings</span>
                         </button>
                         
-                        <button className="panel-item">
+                        <button className="panel-item" onClick={goToHelp}>
                           <HelpCircle size={18} />
                           <span>Help</span>
                         </button>
                         
-                        <button className="panel-item">
+                        <button className="panel-item" onClick={goToAbout}>
                           <Info size={18} />
                           <span>About Us</span>
                         </button>
@@ -220,14 +233,15 @@ const Header = () => {
         {/* Menu Toggle for Mobile - Only shown on mobile screens */}
         {isMobile && (
           <div className='menu-container'>
-            <div 
-              className="pro-container"
-              onClick={goToPricing}
-              style={{ cursor: 'pointer' }}
+            <button 
+              className="pro-button-mobile"
+              onClick={openPricingModal}
             >
-              <img src={proIcon} alt="Pro Icon" className="pro-icon" />
-              <span className="pricing">GET PRO</span>
-            </div>
+              <div className="pro-button-content">
+                <Crown size={14} className="crown-icon" />
+                <span>Upgrade Pro</span>
+              </div>
+            </button>
             <button className="menu-toggle" onClick={toggleDrawer} aria-label="Toggle menu">
               {isDrawerOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -278,11 +292,11 @@ const Header = () => {
               
               <div className="drawer-section">
                 <div className="drawer-section-title">Help & Support</div>
-                <button className="drawer-item">
+                <button className="drawer-item" onClick={goToHelp}>
                   <HelpCircle size={20} />
                   <span>Help Center</span>
                 </button>
-                <button className="drawer-item">
+                <button className="drawer-item" onClick={goToAbout}>
                   <Info size={20} />
                   <span>About Us</span>
                 </button>
@@ -310,9 +324,13 @@ const Header = () => {
                   <Star size={20} />
                   <span>Popular Templates</span>
                 </button>
-                <button className="drawer-item">
+                <button className="drawer-item" onClick={goToHelp}>
                   <HelpCircle size={20} />
                   <span>Help Center</span>
+                </button>
+                <button className="drawer-item" onClick={goToAbout}>
+                  <Info size={20} />
+                  <span>About Us</span>
                 </button>
               </div>
               
@@ -335,9 +353,12 @@ const Header = () => {
               </div>
               
               <div className="drawer-footer">
-                <button className="pro-badge-mobile" onClick={goToPricing}>
-                  <img src={proIcon} alt="Pro Icon" />
-                  <span>GET PRO</span>
+                <button className="pro-button-drawer" onClick={openPricingModal}>
+                  <div className="pro-button-content">
+                    <Crown size={18} className="crown-icon" />
+                    <span>Upgrade Pro</span>
+                    <div className="discount-badge">20% OFF</div>
+                  </div>
                 </button>
               </div>
             </>
@@ -345,7 +366,7 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Auth Modals */}
+      {/* Modals */}
       <LoginModal 
         isOpen={isLoginOpen} 
         onClose={() => setIsLoginOpen(false)} 
@@ -357,6 +378,10 @@ const Header = () => {
       <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
+      />
+      <PricingModal
+        isOpen={isPricingModalOpen}
+        onClose={() => setIsPricingModalOpen(false)}
       />
     </div>
   );

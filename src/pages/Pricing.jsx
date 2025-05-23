@@ -55,7 +55,7 @@ const plans = [
   },
 ];
 
-const Pricing = () => {
+const Pricing = ({ isModal = false }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [promoCode, setPromoCode] = useState('');
 
@@ -143,28 +143,32 @@ const Pricing = () => {
     ));
   };
 
+  const Content = () => (
+    <div className={isModal ? "pricing-modal-view" : "pricing-root"}>
+      <div className="pricing-modal">
+        <h2 className="pricing-title">
+          "PRO-LEVEL THUMBNAIL, SUPER AFFORDABLE PRICE"
+        </h2>
+        
+        {isMobile ? (
+          <div className="pricing-carousel">
+            <Slider {...sliderSettings}>
+              {renderPricingCards()}
+            </Slider>
+          </div>
+        ) : (
+          <div className="pricing-cards">
+            {renderPricingCards()}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="pricing-layout">
-      <Header/>
-      <div className="pricing-root">
-        <div className="pricing-modal">
-          <h2 className="pricing-title">
-            "PRO-LEVEL THUMBNAIL, SUPER AFFORDABLE PRICE"
-          </h2>
-          
-          {isMobile ? (
-            <div className="pricing-carousel">
-              <Slider {...sliderSettings}>
-                {renderPricingCards()}
-              </Slider>
-            </div>
-          ) : (
-            <div className="pricing-cards">
-              {renderPricingCards()}
-            </div>
-          )}
-        </div>
-      </div>
+      {!isModal && <Header />}
+      <Content />
     </div>
   );
 };

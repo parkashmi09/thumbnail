@@ -753,3 +753,88 @@
 .mobile-visible {
   display: flex !important;
 }
+
+.pro-button {
+  background: linear-gradient(to right, #ff9a44, #fc6076);
+  border: none;
+  border-radius: 50px;
+  padding: 8px 15px;
+  display: flex;
+  align-items: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(252, 96, 118, 0.3);
+  transition: all 0.3s ease;
+}
+
+.pro-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(252, 96, 118, 0.4);
+}
+
+.pro-button-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.crown-icon {
+  color: #fff;
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+
+.discount-badge {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: bold;
+  margin-left: 2px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pro-button-mobile {
+  background: linear-gradient(to right, #ff9a44, #fc6076);
+  border: none;
+  border-radius: 50px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  margin-right: 10px;
+  box-shadow: 0 4px 10px rgba(252, 96, 118, 0.3);
+}
+
+.pro-button-drawer {
+  background: linear-gradient(to right, #ff9a44, #fc6076);
+  border: none;
+  border-radius: 50px;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(252, 96, 118, 0.3);
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.pro-button-drawer:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(252, 96, 118, 0.4);
+}

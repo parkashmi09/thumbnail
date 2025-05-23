@@ -7,6 +7,10 @@
     font-style: normal;
   }
   
+  .pricing-layout {
+    width: 100%;
+  }
+
   .pricing-root {
     min-height: 100vh;
     width: 100vw;
@@ -19,6 +23,18 @@
     padding: 0;
     margin: 0;
     overflow-x: hidden;
+  }
+
+  /* Add styles for modal view */
+  .pricing-modal-view {
+    width: 100%;
+    font-family: 'Rasa', Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 0;
   }
   
   .pricing-modal {
@@ -294,6 +310,49 @@
     opacity: 1;
   }
   
+  /* Modal-specific overrides */
+  .pricing-modal-view .pricing-modal {
+    padding: 20px 15px 30px;
+    width: 100%;
+    margin: 0;
+    max-width: none;
+  }
+  
+  .pricing-modal-view .pricing-title {
+    font-size: 1.6rem;
+    margin: 0 0 25px 0;
+  }
+  
+  .pricing-modal-view .pricing-card {
+    width: 250px;
+    padding: 0;
+  }
+
+  .pricing-modal-view .pricing-card.popular {
+    border: none;
+    transform: scale(1.02);
+  }
+  
+  .pricing-modal-view .pricing-card.popular:hover {
+    transform: scale(1.02) translateY(-5px);
+  }
+  
+  .pricing-modal-view .pricing-price {
+    font-size: 2.5rem;
+  }
+  
+  .pricing-modal-view .pricing-oldprice {
+    font-size: 1.2rem;
+  }
+  
+  .pricing-modal-view .pricing-features {
+    font-size: 0.95rem;
+  }
+  
+  .pricing-modal-view .pricing-buynow {
+    margin-bottom: 15px;
+  }
+  
   @media (max-width: 900px) {
     .pricing-modal {
       padding: 24px 16px 40px;
@@ -346,11 +405,6 @@
       padding: 14px 0;
     }
     
-    /* Add styling for a mobile-optimized background */
-    .pricing-root {
-      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
-    }
-    
     /* Mobile-specific card styling */
     .pricing-carousel .slick-slide .pricing-card {
       transition: all 0.3s ease;
@@ -376,6 +430,44 @@
     .pricing-features {
       margin-bottom: 15px;
     }
+    
+    /* Modal-specific mobile overrides */
+    .pricing-modal-view .pricing-modal {
+      padding: 20px 15px 30px;
+      min-height: auto;
+      width: 100%;
+      margin: 0;
+    }
+    
+    .pricing-modal-view .pricing-title {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+    }
+    
+    .pricing-modal-view .pricing-carousel {
+      max-width: 260px;
+    }
+    
+    .pricing-modal-view .pricing-carousel .pricing-card {
+      min-height: 380px;
+    }
+    
+    .pricing-modal-view .pricing-price {
+      font-size: 2.2rem;
+      margin-top: 25px;
+    }
+    
+    .pricing-modal-view .pricing-features li {
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    
+    .pricing-modal-view .pricing-promo-bar {
+      border-radius: 4px;
+      font-size: 0.8rem;
+      padding: 8px 0;
+      margin-bottom: 5px;
+    }
   }
   
   @media (max-width: 375px) {
@@ -385,5 +477,13 @@
     
     .pricing-card {
       width: 270px;
+    }
+    
+    .pricing-modal-view .pricing-carousel {
+      max-width: 250px;
+    }
+    
+    .pricing-modal-view .pricing-card {
+      width: 240px;
     }
   }
