@@ -26,12 +26,12 @@
 }
 @media only screen and (max-width: 767px) {
   .ios-device .canvas-editor {
-    height: calc(100vh - 120px);
+    height: calc(100vh - 125px);
   }
 }
 @media only screen and (max-width: 767px) {
   .canvas-editor {
-    height: calc(100vh - 120px);
+    height: calc(100vh - 125px);
   }
 }
 /* Override any Polotno container styles to ensure full width */

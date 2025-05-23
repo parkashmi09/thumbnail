@@ -315,7 +315,7 @@
 /* Media Queries for Mobile View */
 @media (max-width: 900px) {
   .header-container {
-    max-height: 45px; /* Reduced max height for mobile */
+    max-height: 48px; /* Reduced max height for mobile */
   }
 
   .home-header {
@@ -323,7 +323,7 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    height: 45px; /* Fixed height for tablets */
+    height: 50px; /* Fixed height for tablets */
   }
 
   .logo-container {
@@ -362,13 +362,13 @@
 
 @media (max-width: 600px) {
   .header-container {
-    max-height: 40px; /* Further reduced max height for smaller mobile */
+    max-height: 50px; /* Further reduced max height for smaller mobile */
   }
   
   .home-header {
     padding: 4px 8px;
     justify-content: space-between;
-    height: 40px; /* Fixed height for mobile phones */
+    height: 50px; /* Fixed height for mobile phones */
   }
   
   .logo-text {
@@ -399,7 +399,7 @@
 
 @media (max-width: 400px) {
   .header-container {
-    max-height: 35px; /* Smallest max height for very small screens */
+    max-height: 50px; /* Smallest max height for very small screens */
   }
   
   .home-header {
