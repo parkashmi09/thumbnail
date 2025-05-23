@@ -8,7 +8,14 @@ const PricingModal = ({ isOpen, onClose }) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    setIsModalOpen(isOpen);
+    // Small delay before opening to ensure smooth animation
+    if (isOpen) {
+      setTimeout(() => {
+        setIsModalOpen(true);
+      }, 10);
+    } else {
+      setIsModalOpen(false);
+    }
     
     // If modal is open, prevent background scrolling
     if (isOpen) {
@@ -40,10 +47,23 @@ const PricingModal = ({ isOpen, onClose }) => {
     };
   }, []);
 
-  const handleClose = () => {
+  const handleClose = (e) => {
+    if (e) e.stopPropagation();
     setIsModalOpen(false);
     setTimeout(onClose, 300); // Wait for animation to complete
   };
+
+  // Escape key handler
+  useEffect(() => {
+    const handleEscKey = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        handleClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscKey);
+    return () => window.removeEventListener('keydown', handleEscKey);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -53,10 +73,12 @@ const PricingModal = ({ isOpen, onClose }) => {
         className={`pricing-modal-container ${isModalOpen ? 'open' : 'closing'}`} 
         onClick={(e) => e.stopPropagation()}
       >
-        <button className="pricing-modal-close" onClick={handleClose}>
-          <X size={24} />
+        <button className="pricing-modal-close" onClick={handleClose} aria-label="Close modal">
+          <X size={22} color="#333" />
         </button>
-        <Pricing isModal={true} />
+        <div className="pricing-modal-content">
+          <Pricing isModal={true} />
+        </div>
       </div>
     </div>
   );
