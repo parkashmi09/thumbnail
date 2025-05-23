@@ -10,9 +10,9 @@ const getImageUrl = (path) => {
 };
 
 export const TemplatesPanel = observer(({ store, routingData }) => {
-  console.log(routingData, "routingData^^^^");
   const [templates, setTemplates] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState(null);
   const [categoryName, setCategoryName] = useState('All Templates');
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState('');
 
@@ -29,6 +29,9 @@ export const TemplatesPanel = observer(({ store, routingData }) => {
 
   // Fetch templates based on selected subcategory
   useEffect(() => {
+    // Reset error state when fetching new templates
+    setLoadError(null);
+    
     const fetchTemplates = async () => {
       if (!selectedSubCategoryId && (!routingData || !routingData.data)) {
         console.log("No subcategory ID or routing data available");
@@ -42,11 +45,9 @@ export const TemplatesPanel = observer(({ store, routingData }) => {
         // Use selected subcategory ID if available, otherwise use the first from routingData
         if (selectedSubCategoryId) {
           url += `?subCategoryId=${selectedSubCategoryId}`;
-        } else if (routingData.type === 'category' && routingData.data) {
+        } else if (routingData && routingData.type === 'category' && routingData.data) {
           url += `?categoryId=${routingData.data._id}`;
         }
-        
-        console.log("Fetching templates from:", url);
         
         const res = await fetch(url);
         if (!res.ok) {
@@ -54,17 +55,20 @@ export const TemplatesPanel = observer(({ store, routingData }) => {
         }
 
         const data = await res.json();
-        console.log("Templates data:", data);
         
         // Map API response to template format
         if (data && data.templates) {
           const templatesData = data.templates.map(template => ({
             id: template._id,
             name: template.name,
-            preview: template.previewPath,
+            // Add cache busting to prevent stale images
+            preview: getImageUrl(template.previewPath),
             json: template.jsonPath,
             width: template.width,
-            height: template.height
+            height: template.height,
+            // Add additional properties for handling image loading
+            crossOrigin: 'anonymous',
+            loading: 'lazy'
           }));
           setTemplates(templatesData);
         } else {
@@ -72,6 +76,7 @@ export const TemplatesPanel = observer(({ store, routingData }) => {
         }
       } catch (error) {
         console.error('Error fetching templates:', error);
+        setLoadError(error.message);
         setTemplates([]);
       } finally {
         setIsLoading(false);
@@ -85,6 +90,47 @@ export const TemplatesPanel = observer(({ store, routingData }) => {
   const handleSubCategoryClick = (subCatId, subCatName) => {
     setSelectedSubCategoryId(subCatId);
     setCategoryName(subCatName);
+    setTemplates([]); // Clear templates when switching subcategories for better UX
+    setIsLoading(true); // Show loading state immediately
+  };
+
+  // Custom handler for template selection with better error handling
+  const handleTemplateSelect = async (item) => {
+    try {
+      setIsLoading(true);
+      const req = await fetch(item.json);
+      if (!req.ok) {
+        throw new Error(`Failed to load template (${req.status})`);
+      }
+      const json = await req.json();
+
+      console.log("json is",json);
+      
+      // Process JSON data to ensure all images have proper loading attributes
+      if (json.objects) {
+        json.objects = json.objects.map(obj => {
+          if (obj.type === 'image') {
+            return {
+              ...obj,
+              crossOrigin: 'anonymous',
+            };
+          }
+          return obj;
+        });
+      }
+      
+      // Update page dimensions if template has specific size
+      if (item.width && item.height) {
+        store.setSize(item.width, item.height);
+      }
+      
+      await store.loadJSON(json);
+    } catch (error) {
+      console.error('Error loading template:', error);
+      alert(`Failed to load template: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -132,7 +178,28 @@ export const TemplatesPanel = observer(({ store, routingData }) => {
 
       {/* Templates Grid */}
       <div style={{ flex: 1, overflow: 'auto' }}>
-        {templates.length === 0 && !isLoading ? (
+        {loadError ? (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#e74c3c' }}>
+            Error loading templates: {loadError}
+            <button 
+              onClick={() => {
+                setLoadError(null);
+                setSelectedSubCategoryId(selectedSubCategoryId); // Trigger a refetch
+              }}
+              style={{
+                display: 'block',
+                margin: '10px auto',
+                padding: '5px 10px',
+                background: '#f5f5f5',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Retry
+            </button>
+          </div>
+        ) : templates.length === 0 && !isLoading ? (
           <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
             No templates found
           </div>
@@ -142,34 +209,10 @@ export const TemplatesPanel = observer(({ store, routingData }) => {
             images={templates}
             getPreview={(item) => item.preview}
             isLoading={isLoading}
-            onSelect={async (item) => {
-              try {
-                console.log("Loading template JSON from:", item.json);
-                const req = await fetch(item.json);
-                if (!req.ok) {
-                  throw new Error(`HTTP error! status: ${req.status}`);
-                }
-                const json = await req.json();
-                
-                // Ensure all images in the template have crossOrigin set
-                if (json.objects) {
-                  json.objects = json.objects.map(obj => {
-                    if (obj.type === 'image') {
-                      return {
-                        ...obj,
-                        crossOrigin: 'anonymous',
-                      };
-                    }
-                    return obj;
-                  });
-                }
-                
-                store.loadJSON(json);
-              } catch (error) {
-                console.error('Error loading template:', error);
-              }
-            }}
+            onSelect={handleTemplateSelect}
             rowsNumber={2}
+            loadingText="Loading templates..."
+            loadingColor="#00a67e"
           />
         )}
       </div>

@@ -1122,12 +1122,12 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: #4a7bf7;
+  background: transparent;
   color: white;
   font-weight: 600;
   font-size: 16px;
   padding: 12px 20px;
-  border: none;
+  border: 1px solid white;
   border-radius: 50px;
   cursor: pointer;
   flex: 1;
@@ -1137,7 +1137,7 @@ body {
 }
 
 .create-design-button:hover {
-  transform: translateY(-2px);
+  /* transform: translateY(-2px); */
   box-shadow: 0 6px 20px rgba(74, 123, 247, 0.3);
 }
 
@@ -1649,4 +1649,41 @@ body {
   position: relative;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
+}
+
+/* Add new style for the action buttons wrapper */
+.action-buttons-wrapper {
+  position: absolute;
+  top: -8px;
+  right: -11px;
+  z-index: 20;
+  transform: scale(0.8); /* Reduce the overall size */
+}
+
+/* Modify action buttons inside the carousel */
+.category-carousel .home-action-buttons {
+  height: auto;
+  padding: 5px 10px;
+}
+
+.category-carousel .create-design-button,
+.category-carousel .upgrade-button {
+  height: 36px;
+  font-size: 0.85rem;
+  padding: 0 12px;
+}
+
+.category-carousel .create-design-button svg,
+.category-carousel .upgrade-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Update carousel arrows positioning */
+.carousel-arrow-left {
+  margin-left: 10px;
+}
+
+.carousel-arrow-right {
+  margin-right: 10px;
 }

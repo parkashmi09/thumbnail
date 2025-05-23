@@ -1,6 +1,7 @@
 import React, { useState, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
+import { LoginModal } from '../../Auth/AuthModals';
 
 // Template option component
 const TemplateOption = memo(({ type, name, imageUrl, onClick }) => (
@@ -79,24 +80,38 @@ const CreateDesignModal = ({ isOpen, onClose }) => {
   const [height, setHeight] = useState('');
   const [unit, setUnit] = useState('px');
   const [dpi, setDpi] = useState(72);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   
   if (!isOpen) return null;
+
+  const checkAuthAndNavigate = (dimensions) => {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    
+    if (token && userId) {
+      // User is authenticated, navigate to editor
+      navigate('/editor', {
+        state: {
+          width: dimensions.width,
+          height: dimensions.height,
+          type: dimensions.type,
+          unit: 'px',
+          dpi: 72,
+          useMagic: true
+        }
+      });
+      onClose();
+    } else {
+      // User is not authenticated, show login modal
+      setShowLoginModal(true);
+    }
+  };
 
   const handleNavigateToEditor = (templateType) => {
     const dimensions = TEMPLATE_DIMENSIONS[templateType] || 
       { width: 1280, height: 720, type: 'Custom' };
     
-    navigate('/editor', {
-      state: {
-        width: dimensions.width,
-        height: dimensions.height,
-        type: dimensions.type,
-        unit: 'px',
-        dpi: 72,
-        useMagic: true
-      }
-    });
-    onClose();
+    checkAuthAndNavigate(dimensions);
   };
   
   const handleApplyCustomSize = () => {
@@ -118,17 +133,13 @@ const CreateDesignModal = ({ isOpen, onClose }) => {
       return;
     }
     
-    navigate('/editor', {
-      state: {
-        width: w,
-        height: h,
-        type: 'Custom',
-        unit: unit,
-        dpi: dpi,
-        useMagic: true
-      }
+    checkAuthAndNavigate({
+      width: w,
+      height: h,
+      type: 'Custom',
+      unit: unit,
+      dpi: dpi
     });
-    onClose();
   };
 
   const handlePresetClick = (preset) => {
@@ -152,66 +163,105 @@ const CreateDesignModal = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleLoginSuccess = () => {
+    setShowLoginModal(false);
+    
+    // After successful login, navigate to editor with the last attempted dimensions
+    if (width && height) {
+      let w, h;
+      
+      if (unit === 'px') {
+        w = parseInt(width);
+        h = parseInt(height);
+      } else {
+        w = Math.round(unitToPx({ unit, dpi, unitVal: parseFloat(width) }));
+        h = Math.round(unitToPx({ unit, dpi, unitVal: parseFloat(height) }));
+      }
+      
+      navigate('/editor', {
+        state: {
+          width: w,
+          height: h,
+          type: 'Custom',
+          unit: unit,
+          dpi: dpi,
+          useMagic: true
+        }
+      });
+      onClose();
+    }
+  };
+
   return (
-    <div className="custom-size-modal-overlay" onClick={onClose}>
-      <div className="custom-size-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close-button" onClick={onClose}>
-          <X size={24} />
-        </button>
-        
-        <h2>Custom Size</h2>
-        
-        <div className="custom-size-inputs">
-          <div className="input-group">
-            <input 
-              type="text" 
-              placeholder="Width" 
-              value={width}
-              onChange={(e) => setWidth(e.target.value)}
-            />
-          </div>
-          <div className="input-group">
-            <input 
-              type="text" 
-              placeholder="Height" 
-              value={height}
-              onChange={(e) => setHeight(e.target.value)}
-            />
-          </div>
-          <div className="input-group select-group">
-            <select 
-              value={unit}
-              onChange={(e) => setUnit(e.target.value)}
-            >
-              <option value="px">px</option>
-              <option value="cm">cm</option>
-              <option value="in">in</option>
-              <option value="mm">mm</option>
-            </select>
-          </div>
-        </div>
-        
-        <button className="apply-now-button" onClick={handleApplyCustomSize}>
-          Apply now
-        </button>
-        
-        <div className="common-dimensions">
-          <h3>Common Dimensions</h3>
+    <>
+      <div className="custom-size-modal-overlay" onClick={onClose}>
+        <div className="custom-size-modal" onClick={(e) => e.stopPropagation()}>
+          <button className="modal-close-button" onClick={onClose}>
+            <X size={24} />
+          </button>
           
-          <div className="template-options">
-            {TEMPLATE_OPTIONS.map(option => (
-              <TemplateOption 
-                key={option.type}
-                type={option.type}
-                name={option.name}
-                imageUrl={option.imageUrl}
-                onClick={handleNavigateToEditor}
+          <h2>Custom Size</h2>
+          
+          <div className="custom-size-inputs">
+            <div className="input-group">
+              <input 
+                type="text" 
+                placeholder="Width" 
+                value={width}
+                onChange={(e) => setWidth(e.target.value)}
               />
-            ))}
+            </div>
+            <div className="input-group">
+              <input 
+                type="text" 
+                placeholder="Height" 
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+              />
+            </div>
+            <div className="input-group select-group">
+              <select 
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+              >
+                <option value="px">px</option>
+                <option value="cm">cm</option>
+                <option value="in">in</option>
+                <option value="mm">mm</option>
+              </select>
+            </div>
+          </div>
+          
+          <button className="apply-now-button" onClick={handleApplyCustomSize}>
+            Apply now
+          </button>
+          
+          <div className="common-dimensions">
+            <h3>Common Dimensions</h3>
+            
+            <div className="template-options">
+              {TEMPLATE_OPTIONS.map(option => (
+                <TemplateOption 
+                  key={option.type}
+                  type={option.type}
+                  name={option.name}
+                  imageUrl={option.imageUrl}
+                  onClick={handleNavigateToEditor}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)}
+        redirectAfterLogin={false}
+        onLoginSuccess={handleLoginSuccess}
+      />
+    </>
   );
 };
 

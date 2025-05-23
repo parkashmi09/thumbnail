@@ -588,8 +588,6 @@ const Editor = () => {
       Panel: (props) => <TemplatesSection.Panel {...props} routingData={routingData} />
     },
     CustomElements,
-    ResizePanel,
-    RemoveBackgroundSection,
     ...DEFAULT_SECTIONS.filter(section => section.name !== 'templates' && section.name !== 'elements'),
   ];
 

@@ -6,6 +6,11 @@ import './TemplateGrid.css';
 import Loader from '../../Loader';
 import { LoginModal } from '../../Auth/AuthModals';
 
+// Helper function to create image URL with cache busting
+const getImageUrl = (path) => {
+  return `${path}?_=${new Date().getTime()}`;
+};
+
 // Skeleton loader component for templates
 const TemplateSkeleton = ({ count = 10 }) => {
   return Array(count).fill(0).map((_, index) => (
@@ -58,6 +63,7 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [loadedImages, setLoadedImages] = useState({});
   const scrollContainerRef = useRef(null);
   
   // Check if we have templates data to render
@@ -71,6 +77,18 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
       setShowSkeletons(true);
     }
   }, [templates, loading]);
+
+  // Reset loaded images state when templates change
+  useEffect(() => {
+    if (templates && templates.length > 0) {
+      // Initialize with false values for all template IDs
+      const initialLoadState = {};
+      templates.forEach(tpl => {
+        initialLoadState[tpl._id] = false;
+      });
+      setLoadedImages(initialLoadState);
+    }
+  }, [templates]);
 
   // Track loading state
   useEffect(() => {
@@ -125,10 +143,22 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
     }
   };
 
-  // Show auth modal when a template is clicked and user is not logged in
-  const openAuthModal = (template) => {
-    setSelectedTemplate(template);
-    setShowAuthModal(true);
+  // Handle image load
+  const handleImageLoad = (templateId) => {
+    setLoadedImages(prev => ({
+      ...prev,
+      [templateId]: true
+    }));
+  };
+
+  // Handle image error
+  const handleImageError = (templateId) => {
+    console.error(`Failed to load image for template: ${templateId}`);
+    // Mark as loaded to remove loading placeholder
+    setLoadedImages(prev => ({
+      ...prev,
+      [templateId]: true
+    }));
   };
 
   // Show skeleton loader when loading initially and no templates are available
@@ -188,12 +218,20 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
               }}
               onClick={(e) => handleTemplateClick(e, tpl)}
             >
+              {!loadedImages[tpl._id] && (
+                <div className="template-img-placeholder skeleton-img"></div>
+              )}
               <img
-                src={tpl.previewPath}
+                src={getImageUrl(tpl.previewPath)}
                 alt={tpl.name || 'Template'}
                 className="template-img"
                 loading="lazy"
-                style={{ display: 'block' }}
+                onLoad={() => handleImageLoad(tpl._id)}
+                onError={() => handleImageError(tpl._id)}
+                style={{ 
+                  display: loadedImages[tpl._id] ? 'block' : 'none',
+                  crossOrigin: "anonymous"
+                }}
               />
               <div className="template-name">{tpl.name}</div>
             </Link>

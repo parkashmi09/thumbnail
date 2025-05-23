@@ -62,7 +62,7 @@ const Home = () => {
       if (searchTerm) setSearching(true);
     }
     
-    let url = `https://thumnail-maker.onrender.com/api/v1/get/templates?page=${pageNum}&limit=${LIMIT}&categoryId=${categoryId}`;
+    let url = `https://thumnail-maker.onrender.com/api/v1/get/templates?page=${pageNum}&limit=${LIMIT}&category=${categoryId}`;
     
     // Add search term if provided
     if (searchTerm) {
@@ -239,7 +239,7 @@ const Home = () => {
         <div className="fixed-top-section">
           {/* Carousel and Search */}
           <div className="carousel-wrapper">
-            <CategoryCarousel categories={categories} onCategoryChange={handleCategoryChange} />
+            <CategoryCarousel goToEditor={goToEditor} categories={categories} onCategoryChange={handleCategoryChange} />
             <Searchbar onSearch={handleSearch} />
           </div>
           

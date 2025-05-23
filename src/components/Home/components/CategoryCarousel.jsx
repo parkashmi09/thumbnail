@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCategory } from '../../../context/CategoryContext.jsx';
+import ActionButtons from "./ActionButtons.jsx";
 
 const MOBILE_BREAKPOINT = 600; // Reduced breakpoint for better mobile detection
 
@@ -22,7 +23,7 @@ const LoadingSkeleton = () => {
   );
 };
 
-const CategoryCarousel = ({ categories, onCategoryChange }) => {
+const CategoryCarousel = ({ categories, onCategoryChange, goToEditor }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= MOBILE_BREAKPOINT);
   const [currentIndex, setCurrentIndex] = useState(3); // Start at first real item
   const [isTransitioning, setIsTransitioning] = useState(true);
@@ -133,11 +134,15 @@ const CategoryCarousel = ({ categories, onCategoryChange }) => {
   if (isLoading) {
     return <LoadingSkeleton />;
   }
-
+ 
   return (
     <div className="category-carousel">
+      <div className="action-buttons-wrapper">
+        <ActionButtons goToEditor={goToEditor} />
+      </div>
+      
       <motion.button
-        className="carousel-arrow"
+        className="carousel-arrow carousel-arrow-left"
         onClick={handlePrev}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
@@ -172,7 +177,7 @@ const CategoryCarousel = ({ categories, onCategoryChange }) => {
         </motion.div>
       </div>
       <motion.button
-        className="carousel-arrow"
+        className="carousel-arrow carousel-arrow-right"
         onClick={handleNext}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
