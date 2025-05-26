@@ -8,6 +8,7 @@ import useCustomFonts from './hooks/useCustomFonts';
 import Editor from './pages/EditorPage.jsx';
 import Help from './pages/Help';
 import AboutUs from './pages/AboutUs';
+import RecentProjects from './pages/RecentProjects';
 import { LoginModal } from './components/Auth/AuthModals.jsx';
 
 // Auth protected route component
@@ -100,6 +101,7 @@ function App() {
       <CategoryProvider>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/recent-projects" element={<RecentProjects />} />
           <Route path="/editor/:templateId" element={<EditorWithKey />} />
           <Route path="/editor" element={<EditorWithKey />} />
           <Route path="/help" element={<Help />} />

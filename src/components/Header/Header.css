@@ -815,6 +815,11 @@
   margin-right: 10px;
   box-shadow: 0 4px 10px rgba(252, 96, 118, 0.3);
 }
+@media (max-width: 480px) {
+  .pro-button-mobile {
+    display: none;
+  }
+}
 
 .pro-button-drawer {
   background: linear-gradient(to right, #ff9a44, #fc6076);

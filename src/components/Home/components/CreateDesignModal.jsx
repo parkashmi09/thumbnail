@@ -98,15 +98,16 @@ const CreateDesignModal = ({ isOpen, onClose }) => {
     const userId = localStorage.getItem('userId');
     
     if (token && userId) {
-      // User is authenticated, navigate to editor
+      // User is authenticated, navigate to editor with proper dimensions
       navigate('/editor', {
         state: {
-          width: dimensions.width,
-          height: dimensions.height,
-          type: dimensions.type,
-          unit: 'px',
-          dpi: 72,
-          useMagic: true
+          width: parseInt(dimensions.width),
+          height: parseInt(dimensions.height),
+          type: dimensions.type || 'Custom',
+          unit: dimensions.unit || 'px',
+          dpi: dimensions.dpi || 72,
+          useMagic: true,
+          fromCreateModal: true
         }
       });
       onClose();
@@ -126,7 +127,11 @@ const CreateDesignModal = ({ isOpen, onClose }) => {
     const dimensions = TEMPLATE_DIMENSIONS[templateType] || 
       { width: 1280, height: 720, type: 'Custom' };
     
-    checkAuthAndNavigate(dimensions);
+    checkAuthAndNavigate({
+      ...dimensions,
+      unit: 'px',
+      dpi: 72
+    });
   };
   
   const handleApplyCustomSize = () => {
@@ -276,4 +281,4 @@ const CreateDesignModal = ({ isOpen, onClose }) => {
   );
 };
 
-export default CreateDesignModal; 
+export default CreateDesignModal;

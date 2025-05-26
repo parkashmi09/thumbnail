@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Header.css';
-import { Menu, X, User, LogOut, Home, Settings, Info, Star, HelpCircle, Crown } from 'lucide-react';
+import { Menu, X, User, LogOut, Home, Settings, Info, Star, HelpCircle, Crown, Clock } from 'lucide-react';
 import { Popover } from '@headlessui/react';
 import logo from '../../assets/images/LOGO.png';
 import { LoginModal, RegisterModal } from '../Auth/AuthModals';
@@ -127,6 +127,11 @@ const Header = () => {
     closeDrawer();
   };
 
+  const goToRecentProjects = () => {
+    navigate('/recent-projects');
+    closeDrawer();
+  };
+
   const handleOpenLogin = () => {
     closeDrawer();
     setIsLoginOpen(true);
@@ -191,6 +196,11 @@ const Header = () => {
                         <span>{user.name}</span>
                       </div>
                       <div className="panel-content">
+                        <button className="panel-item" onClick={goToRecentProjects}>
+                          <Clock size={18} />
+                          <span>Recent Projects</span>
+                        </button>
+                        
                         <button className="panel-item" onClick={goToProfile}>
                           <User size={18} />
                           <span>Profile Settings</span>
@@ -284,6 +294,10 @@ const Header = () => {
                   <Home size={20} />
                   <span>Home</span>
                 </button>
+                <button className="drawer-item" onClick={goToRecentProjects}>
+                  <Clock size={20} />
+                  <span>Recent Projects</span>
+                </button>
                 <button className="drawer-item" onClick={goToProfile}>
                   <Settings size={20} />
                   <span>Profile Settings</span>
@@ -319,6 +333,10 @@ const Header = () => {
                 <button className="drawer-item" onClick={goToHome}>
                   <Home size={20} />
                   <span>Home</span>
+                </button>
+                <button className="drawer-item" onClick={goToRecentProjects}>
+                  <Clock size={20} />
+                  <span>Recent Projects</span>
                 </button>
                 <button className="drawer-item">
                   <Star size={20} />
