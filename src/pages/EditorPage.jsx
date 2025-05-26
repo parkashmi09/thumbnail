@@ -1,3 +1,4 @@
+// src/Editor.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { PolotnoContainer, SidePanelWrap, WorkspaceWrap } from 'polotno';
@@ -16,23 +17,24 @@ import Header from '../components/Header/Header';
 import CustomElements from '../components/CustomElements/CustomElements';
 import ActionControls from '../components/ActionControls';
 import Loader from '../components/Loader';
+import { MyProjectsSection } from '../components/MyProjectsSection/MyProjectsSection';
+import { ProjectContext, createProject, useProject } from '../utils/project';
 
-// Create store instance function to allow recreation on component mount
+
+
+// Create store instance function
 const createEditorStore = () => {
   const store = createStore({
-    key: 'nFA5H9elEytDyPyvKL7T', // This key is for Polotno editor store
+    key: 'nFA5H9elEytDyPyvKL7T',
     showCredit: true,
   });
-
-  // Ensure at least one page exists
   if (store.pages.length === 0) {
     store.addPage();
   }
-  
   return store;
 };
 
-// Custom Size/Resize Section for Side Panel
+// ResizePanel (unchanged)
 const ResizePanel = {
   name: 'resize',
   Tab: (props) => (
@@ -45,7 +47,6 @@ const ResizePanel = {
     const [height, setHeight] = useState(store.height || 720);
     const [unit, setUnit] = useState(store.unit || 'px');
     
-    // Update local state when store dimensions change
     useEffect(() => {
       setWidth(store.width);
       setHeight(store.height);
@@ -55,11 +56,9 @@ const ResizePanel = {
     const handleResize = () => {
       const w = parseInt(width);
       const h = parseInt(height);
-      
       if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) {
         return;
       }
-      
       store.setSize(w, h);
     };
     
@@ -75,7 +74,6 @@ const ResizePanel = {
         'instagram-ad': { width: 1080, height: 1080 },
         'full-hd': { width: 1920, height: 1080 },
       };
-      
       const selected = presets[preset];
       if (selected) {
         setWidth(selected.width);
@@ -88,7 +86,6 @@ const ResizePanel = {
     return (
       <div style={{ padding: '15px' }}>
         <h3>Canvas Size</h3>
-        
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px' }}>Width:</label>
           <input 
@@ -97,7 +94,6 @@ const ResizePanel = {
             onChange={(e) => setWidth(e.target.value)}
             style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
           />
-          
           <label style={{ display: 'block', marginBottom: '5px' }}>Height:</label>
           <input 
             type="number" 
@@ -105,7 +101,6 @@ const ResizePanel = {
             onChange={(e) => setHeight(e.target.value)}
             style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
           />
-          
           <label style={{ display: 'block', marginBottom: '5px' }}>Unit:</label>
           <select 
             value={unit} 
@@ -117,7 +112,6 @@ const ResizePanel = {
             <option value="in">Inches (in)</option>
             <option value="mm">Millimeters (mm)</option>
           </select>
-          
           <button 
             onClick={handleResize}
             style={{
@@ -135,7 +129,6 @@ const ResizePanel = {
             Apply Size
           </button>
         </div>
-        
         <h3>Common Presets</h3>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           <button 
@@ -168,7 +161,7 @@ const ResizePanel = {
   }),
 };
 
-// Utility function to resize image to stay within 0.25 megapixels (250,000 pixels)
+// resizeImage utility (unchanged)
 const resizeImage = (blob, maxPixels = 250000) => {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -176,20 +169,16 @@ const resizeImage = (blob, maxPixels = 250000) => {
     img.onload = () => {
       let { width, height } = img;
       const totalPixels = width * height;
-
-      // If image exceeds the limit, resize it
       if (totalPixels > maxPixels) {
         const scale = Math.sqrt(maxPixels / totalPixels);
         width = Math.floor(width * scale);
         height = Math.floor(height * scale);
       }
-
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, width, height);
-
       canvas.toBlob(
         (resizedBlob) => {
           if (resizedBlob) {
@@ -205,7 +194,7 @@ const resizeImage = (blob, maxPixels = 250000) => {
   });
 };
 
-// Custom Remove Background Section for Side Panel
+// RemoveBackgroundSection (unchanged)
 const RemoveBackgroundSection = {
   name: 'remove-background',
   Tab: (props) => (
@@ -219,7 +208,6 @@ const RemoveBackgroundSection = {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Handle image file selection
     const handleImageUpload = (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -232,43 +220,29 @@ const RemoveBackgroundSection = {
       }
     };
 
-    // Function to call Pixian Background Remover API
     const removeBackground = async () => {
       if (!imageFile) return;
-
       setLoading(true);
       setError(null);
-
       try {
-        // Resize the image to 0.25 megapixels
         const resizedImage = await resizeImage(imageFile);
-
-        // Prepare form data for Pixian API
         const formData = new FormData();
         formData.append('image', resizedImage, 'image.png');
-        formData.append('test', 'true'); // Add test=true parameter
-
+        formData.append('test', 'true');
         const username = 'pxymy6dl6t975nh';
         const apiKey = '527sdkif1ootsq72g6gtp99ifc3lrbdogtbq9se8tlr9t04vbqrr';
         const authHeader = `Basic ${btoa(`${username}:${apiKey}`)}`;
-
         const req = await fetch('https://api.pixian.ai/api/v2/remove-background', {
           method: 'POST',
-          headers: {
-            Authorization: authHeader,
-          },
+          headers: { Authorization: authHeader },
           body: formData,
         });
-
         if (!req.ok) {
           const errorMessage = await req.text();
           throw new Error(errorMessage || 'Error while removing background');
         }
-
         const responseBlob = await req.blob();
         const resultUrl = URL.createObjectURL(responseBlob);
-
-        // Add the processed image to the canvas
         store.activePage.addElement({
           type: 'image',
           src: resultUrl,
@@ -277,8 +251,7 @@ const RemoveBackgroundSection = {
           width: 400,
           height: 400,
         });
-
-        setPreviewUrl(resultUrl); // Update preview with the new image
+        setPreviewUrl(resultUrl);
       } catch (err) {
         setError(err.message);
         if (err.message.includes('Network Error')) {
@@ -294,8 +267,6 @@ const RemoveBackgroundSection = {
     return (
       <div style={{ padding: '10px', maxHeight: '100%', overflow: 'auto' }}>
         <h3>Remove Background</h3>
-
-        {/* Image Upload Input */}
         <div style={{ marginBottom: '10px' }}>
           <input
             type="file"
@@ -304,8 +275,6 @@ const RemoveBackgroundSection = {
             style={{ marginBottom: '10px' }}
           />
         </div>
-
-        {/* Image Preview */}
         {previewUrl && (
           <div style={{ marginBottom: '20px' }}>
             <img
@@ -315,25 +284,19 @@ const RemoveBackgroundSection = {
             />
           </div>
         )}
-
-        {/* Remove Background Button */}
         <button
           onClick={removeBackground}
           disabled={!imageFile || loading}
-          // className="bp5-button bp5-intent-primary"
-          intent="primary"
           style={{
-            marginBottom: "10px",
-            padding: "5px 15px",
-            borderRadius: "5px",
-            background: "linear-gradient(90deg, #00291b 0%, #00a67e 100%)",
-            color: "#fff",
+            marginBottom: '10px',
+            padding: '5px 15px',
+            borderRadius: '5px',
+            background: 'linear-gradient(90deg, #00291b 0%, #00a67e 100%)',
+            color: '#fff',
           }}
         >
-          {loading ? "Processing..." : "Remove Background"}
+          {loading ? 'Processing...' : 'Remove Background'}
         </button>
-
-        {/* Error Message */}
         {error && (
           <div style={{ color: 'red', marginTop: '10px' }}>
             Error: {error}
@@ -344,56 +307,39 @@ const RemoveBackgroundSection = {
   }),
 };
 
-// Custom Toolbar Component for Image Remove Background
+// ImageRemoveBackground (unchanged)
 const ImageRemoveBackground = observer(({ store, element }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Function to call Pixian Background Remover API
   const removeBackground = async () => {
     if (!element || !element.src) return;
-
     setLoading(true);
     setError(null);
-
     try {
-      // Prepare form data for Pixian API
       const formData = new FormData();
-      // Fetch the image from the element's src and convert to a blob
       const response = await fetch(element.src);
       const imageBlob = await response.blob();
-      // Resize the image to 0.25 megapixels
       const resizedImage = await resizeImage(imageBlob);
       formData.append('image', resizedImage, 'image.png');
-      formData.append('test', 'true'); // Add test=true parameter
-
+      formData.append('test', 'true');
       const username = 'pxymy6dl6t975nh';
       const apiKey = '527sdkif1ootsq72g6gtp99ifc3lrbdogtbq9se8tlr9t04vbqrr';
       const authHeader = `Basic ${btoa(`${username}:${apiKey}`)}`;
-
       const req = await fetch('https://api.pixian.ai/api/v2/remove-background', {
         method: 'POST',
-        headers: {
-          Authorization: authHeader,
-        },
+        headers: { Authorization: authHeader },
         body: formData,
       });
-
       if (!req.ok) {
         const errorMessage = await req.text();
         throw new Error(errorMessage || 'Error while removing background');
       }
-
       const responseBlob = await req.blob();
       const resultUrl = URL.createObjectURL(responseBlob);
-
-      // Update the selected image element with the new src
-      element.set({
-        src: resultUrl,
-      });
-
-      setIsModalOpen(false); // Close modal on success
+      element.set({ src: resultUrl });
+      setIsModalOpen(false);
     } catch (err) {
       setError(err.message);
       if (err.message.includes('Network Error')) {
@@ -410,15 +356,12 @@ const ImageRemoveBackground = observer(({ store, element }) => {
     <>
       <button
         onClick={() => setIsModalOpen(true)}
-        text="Remove Background"
-        intent="primary"
         style={{
-          padding: "5px 15px",
-          borderRadius: "5px",
-          background: "linear-gradient(90deg, #00291b 0%, #00a67e 100%)",
-          color: "#fff",
-          cursor: "pointer",
-          // marginBottom: "10px",
+          padding: '5px 15px',
+          borderRadius: '5px',
+          background: 'linear-gradient(90deg, #00291b 0%, #00a67e 100%)',
+          color: '#fff',
+          cursor: 'pointer',
         }}
         disabled={loading}
       >
@@ -476,27 +419,18 @@ const Editor = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [store] = useState(createEditorStore);
-  
-  // Get dimensions from location state or default values
+  const [project] = useState(() => createProject({ store }));
+
   const stateData = location.state || {};
   const width = stateData.width || 1280;
   const height = stateData.height || 720;
   const unit = stateData.unit || 'px';
   const dpi = stateData.dpi || 72;
-  const designType = stateData.type || 'Custom';
-  const useMagic = stateData.useMagic || false;
-
-  // Get routingData from location state or sessionStorage
   const routingData = stateData.routingData || 
     (sessionStorage.getItem('templateRoutingData') 
       ? JSON.parse(sessionStorage.getItem('templateRoutingData')) 
       : null);
 
-
-
-  console.log(routingData, "routingData");
-  
-  // Clear sessionStorage after retrieving the data
   useEffect(() => {
     if (sessionStorage.getItem('templateRoutingData')) {
       sessionStorage.removeItem('templateRoutingData');
@@ -504,25 +438,13 @@ const Editor = () => {
   }, []);
 
   useEffect(() => {
-    // Set page size with dimensions from router state
     if (width > 0 && height > 0) {
-      // Set page size for the first page
       if (store.pages.length > 0) {
-        store.pages[0].set({
-          width,
-          height,
-        });
+        store.pages[0].set({ width, height });
       }
-
-      // Also set store dimensions to match
       store.setSize(width, height);
-      
-      // Set unit if provided
       if (unit && ['px', 'mm', 'cm', 'in'].includes(unit)) {
-        store.setUnit({
-          unit,
-          dpi,
-        });
+        store.setUnit({ unit, dpi });
       }
     }
   }, [width, height, unit, dpi, store]);
@@ -532,98 +454,91 @@ const Editor = () => {
       setLoading(true);
       setError(null);
       try {
-        // Add routingData to API request if available
-        let url = `https://thumnail-maker.onrender.com/api/v1/templates/${templateId}`;
-        
-        // If routingData exists, add it as query parameters
-        if (routingData) {
-          const queryParams = new URLSearchParams();
-          
-          if (routingData.type === 'subCategories' && routingData.data && routingData.data.length > 0) {
-            // For subcategories, use the first subcategory ID
-            queryParams.append('subCategoryId', routingData.data[0]._id);
-          } else if (routingData.type === 'category' && routingData.data) {
-            // For category only, use the category ID
-            queryParams.append('categoryId', routingData.data._id);
+        if (templateId && templateId !== 'new') {
+          let url = `https://thumnail-maker.onrender.com/api/v1/templates/${templateId}`;
+          if (routingData) {
+            const queryParams = new URLSearchParams();
+            if (routingData.type === 'subCategories' && routingData.data && routingData.data.length > 0) {
+              queryParams.append('subCategoryId', routingData.data[0]._id);
+            } else if (routingData.type === 'category' && routingData.data) {
+              queryParams.append('categoryId', routingData.data._id);
+            }
+            if (queryParams.toString()) {
+              url += `?${queryParams.toString()}`;
+            }
           }
-          
-          // Append query parameters if any were added
-          if (queryParams.toString()) {
-            url += `?${queryParams.toString()}`;
+          const res = await fetch(url);
+          if (!res.ok) throw new Error('Template not found');
+          const tpl = await res.json();
+          if (tpl.jsonPath) {
+            const jsonRes = await fetch(tpl.jsonPath);
+            const json = await jsonRes.json();
+            await store.loadJSON(json);
+            
+            // Set template information for better project naming
+            project.setTemplateInfo({
+              name: tpl.name || tpl.title || `Template Design ${Date.now()}`,
+              templateId: tpl._id || tpl.id
+            });
           }
-        }
-        
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Template not found');
-        const tpl = await res.json();
-        if (tpl.jsonPath) {
-          const jsonRes = await fetch(tpl.jsonPath);
-          const json = await jsonRes.json();
-          await store.loadJSON(json);
+        } else {
+          await project.firstLoad(); // Load last project or create a blank canvas
         }
       } catch (e) {
-        // Only set error if we're not creating a new design
-        if (templateId !== 'new') {
-          setError(e.message);
-        }
+        setError(e.message);
       } finally {
         setLoading(false);
       }
     };
+    fetchAndLoadTemplate();
+  }, [templateId, store, routingData, project]);
 
-    if (templateId && templateId !== 'new') {
-      fetchAndLoadTemplate();
-    } else {
-      // If templateId is 'new' or not provided, just set loading to false
-      // This will create a blank canvas with dimensions from URL params
-      setLoading(false);
-    }
-  }, [templateId, store, routingData]);
-
-  // Update sections to include ResizePanel and RemoveBackgroundSection
   const sections = [
+    MyProjectsSection,
     { 
       ...TemplatesSection, 
       templateId,
       Panel: (props) => <TemplatesSection.Panel {...props} routingData={routingData} />
     },
     CustomElements,
+    ResizePanel,
+    RemoveBackgroundSection,
     ...DEFAULT_SECTIONS.filter(section => section.name !== 'templates' && section.name !== 'elements'),
   ];
 
   if (loading) return <Loader text="Loading editor..." />;
-  
-  // Only show error if template was requested but not found
   if (error && templateId && templateId !== 'new') {
     return <div style={{ padding: 40, color: 'red', textAlign: 'center' }}>Error: {error}</div>;
   }
 
   return (
     <AuthProvider>
-      <div className="app-container">
-        <Header />
-        <main className="main-content">
-          <div className="canvas-editor">
-            <PolotnoContainer>
-              <SidePanelWrap>
-                <SidePanel store={store} sections={sections} defaultSection="all-templates" />
-              </SidePanelWrap>
-              <WorkspaceWrap>
-                <Toolbar
-                  store={store}
-                  components={{
-                    ActionControls,
-                    ImageRemoveBackground, // Add the custom Remove Background button for images
-                  }}
-                />
-                <Workspace store={store} />
-                <ZoomButtons store={store} />
-                <PagesTimeline store={store} />
-              </WorkspaceWrap>
-            </PolotnoContainer>
-          </div>
-        </main>
-      </div>
+      <ProjectContext.Provider value={project}>
+        <div className="app-container">
+          <Header />
+          <main className="main-content">
+            <div className="canvas-editor">
+              <PolotnoContainer>
+                <SidePanelWrap>
+                  <SidePanel store={store} sections={sections} defaultSection="my-projects" />
+                </SidePanelWrap>
+                <WorkspaceWrap>
+                  <Toolbar
+                    store={store}
+                    components={{
+                      ActionControls,
+                      ImageRemoveBackground,
+                    }}
+                  />
+                  <Workspace store={store} />
+                  <ZoomButtons store={store} />
+                  <PagesTimeline store={store} />
+                </WorkspaceWrap>
+              </PolotnoContainer>
+            </div>
+          </main>
+        </div>
+      </ProjectContext.Provider>
     </AuthProvider>
   );
 };
