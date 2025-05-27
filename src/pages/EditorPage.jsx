@@ -18,6 +18,8 @@ import ActionControls from '../components/ActionControls';
 import Loader from '../components/Loader';
 import { MyProjectsSection } from '../components/MyProjectsSection/MyProjectsSection';
 import { ProjectContext, createProject, useProject } from '../utils/project';
+import { useCreditsContext } from '../context/CreditsContext';
+import toast from 'react-hot-toast';
 
 // Create store instance function
 const createEditorStore = () => {
@@ -69,8 +71,29 @@ const ImageRemoveBackground = observer(({ store, element }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showCreditsError, setShowCreditsError] = useState(false);
+  
+  // Use the credits context
+  const { credits, consumeCredits, hasCredits } = useCreditsContext();
+  
+  // Force re-render on credits change
+  const [, setForceUpdate] = useState(0);
+  
+  // Check credits on open
+  useEffect(() => {
+    if (isModalOpen) {
+      setForceUpdate(prev => prev + 1);
+    }
+  }, [isModalOpen, credits]);
 
   const removeBackground = async () => {
+    // Check if user has enough credits
+    if (!hasCredits) {
+      setShowCreditsError(true);
+      setError('Not enough credits. Please upgrade to Pro to get more credits.');
+      return;
+    }
+    
     if (!element || !element.src) return;
     setLoading(true);
     setError(null);
@@ -93,6 +116,13 @@ const ImageRemoveBackground = observer(({ store, element }) => {
         const errorMessage = await req.text();
         throw new Error(errorMessage || 'Error while removing background');
       }
+      
+      // Consume 1 credit after successful API call
+      const consumed = consumeCredits(1);
+      if (consumed) {
+        toast.success('Background removed successfully! Used 1 credit.');
+      }
+      
       const responseBlob = await req.blob();
       const resultUrl = URL.createObjectURL(responseBlob);
       element.set({ src: resultUrl });
@@ -106,6 +136,8 @@ const ImageRemoveBackground = observer(({ store, element }) => {
       }
     } finally {
       setLoading(false);
+      // Force UI to update with latest credit count
+      setForceUpdate(prev => prev + 1);
     }
   };
 
@@ -144,7 +176,25 @@ const ImageRemoveBackground = observer(({ store, element }) => {
               </div>
             )}
             {!loading && !error && (
-              <p>Are you sure you want to remove the background of this image?</p>
+              <div>
+                <p>Are you sure you want to remove the background of this image?</p>
+                <p style={{ fontWeight: 'bold', marginTop: '10px' }}>
+                  This action will use 1 credit. You have {credits} credits remaining.
+                </p>
+              </div>
+            )}
+            {showCreditsError && (
+              <div style={{ marginTop: '15px' }}>
+                <Button
+                  intent="primary"
+                  text="Upgrade to Pro"
+                  onClick={() => {
+                    // Close this modal
+                    setIsModalOpen(false);
+                    // You could add logic here to open the pricing modal
+                  }}
+                />
+              </div>
             )}
           </div>
         </DialogBody>
@@ -160,7 +210,7 @@ const ImageRemoveBackground = observer(({ store, element }) => {
                 intent="primary"
                 text="Confirm"
                 onClick={removeBackground}
-                disabled={loading}
+                disabled={loading || !hasCredits}
               />
             </>
           }

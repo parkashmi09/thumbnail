@@ -2,7 +2,7 @@ import React, { Fragment, useState, useRef, useEffect, useCallback, memo } from 
 import { Dialog, Transition } from '@headlessui/react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { X, Eye, EyeOff, Clock } from 'lucide-react';
+import { X, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import './AuthModals.css';
 import Logo from '../../assets/images/LOGO.png';
@@ -10,20 +10,38 @@ import googleIcon from '../../assets/images/ggogle.png';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import LoginSuccessModal from './LoginSuccessModal';
+import { triggerCreditsUpdate } from '../../hooks/useCredits';
 
 // API URLs
 const API_BASE_URL = 'https://thumnail-maker.onrender.com/api/v1';
 const SIGN_UP_URL = `${API_BASE_URL}/user/signUp`;
-const SIGN_IN_URL = `${API_BASE_URL}/user/signIn`;
 const GET_USER_URL = `${API_BASE_URL}/user/getBy-id`;
 const MOBILE_LOGIN_URL = `${API_BASE_URL}/user/login-with-mobile`;
 const VERIFY_OTP_URL = `${API_BASE_URL}/user/verify-otp`;
 const GOOGLE_AUTH_URL = `${API_BASE_URL}/google`;
 
+// Credit system constants
+const CREDITS_KEY = 'thumbnail_credits';
+const MAX_CREDITS = 20;
+
+// Function to reset user credits
+const resetUserCredits = () => {
+  localStorage.setItem(
+    CREDITS_KEY,
+    JSON.stringify({
+      date: new Date().toDateString(),
+      credits: MAX_CREDITS,
+    })
+  );
+  // Trigger credit update event to notify all components
+  triggerCreditsUpdate();
+};
+
 // Validation schemas
-const LoginSchema = Yup.object().shape({
-  email: Yup.string().email('Invalid email').required('Required'),
-  password: Yup.string().required('Required'),
+const OtpSchema = Yup.object().shape({
+  phone: Yup.string()
+    .matches(/^[0-9]{10}$/, 'Must be exactly 10 digits')
+    .required('Required'),
 });
 
 const RegisterSchema = Yup.object().shape({
@@ -34,12 +52,6 @@ const RegisterSchema = Yup.object().shape({
     .required('Required'),
   password: Yup.string()
     .min(8, 'Must be at least 8 characters')
-    .required('Required'),
-});
-
-const OtpSchema = Yup.object().shape({
-  phone: Yup.string()
-    .matches(/^[0-9]{10}$/, 'Must be exactly 10 digits')
     .required('Required'),
 });
 
@@ -151,6 +163,9 @@ const fetchUserData = async (userId) => {
     localStorage.setItem('userName', userData.userName);
     if (userData.email) localStorage.setItem('userEmail', userData.email);
     
+    // Reset credits when user data is fetched
+    resetUserCredits();
+    
     return userData;
   } catch (error) {
     console.error('Error fetching user data:', error);
@@ -221,89 +236,6 @@ const GoogleButton = memo(({ delay = 0.42 }) => (
       Continue with Google
     </motion.button>
   </>
-));
-
-// Password field component with toggle
-const PasswordField = memo(({ name, placeholder, errors, touched }) => {
-  const [showPassword, setShowPassword] = useState(false);
-  
-  return (
-    <>
-      <div className="password-field-container">
-        <Field
-          name={name}
-          type={showPassword ? "text" : "password"}
-          placeholder={placeholder || "Password"}
-          className="form-input"
-        />
-        <button 
-          type="button"
-          className="password-toggle-btn"
-          onClick={() => setShowPassword(!showPassword)}
-          tabIndex="-1"
-        >
-          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-        </button>
-      </div>
-      {errors && touched && <div className="error">{errors}</div>}
-    </>
-  );
-});
-
-// Password login form component
-const PasswordLoginForm = memo(({ handleSubmit, isLoading }) => (
-  <Formik
-    initialValues={{ email: '', password: '' }}
-    validationSchema={LoginSchema}
-    onSubmit={handleSubmit}
-  >
-    {({ errors, touched, isSubmitting }) => (
-      <Form className="auth-form">
-        <motion.div
-          className="form-group"
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.15, duration: 0.4 }}
-        >
-          <Field
-            name="email"
-            type="email"
-            placeholder="Email"
-            className="form-input"
-          />
-          {errors.email && touched.email && (
-            <div className="error">{errors.email}</div>
-          )}
-        </motion.div>
-        <motion.div
-          className="form-group"
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.22, duration: 0.4 }}
-        >
-          <PasswordField 
-            name="password" 
-            errors={errors.password}
-            touched={touched.password}
-          />
-          <div className="forgot-password-link">
-            <a href="#" onClick={e => { e.preventDefault(); toast('Forgot password clicked!'); }}>Forgot Password?</a>
-          </div>
-        </motion.div>
-        <motion.button
-          type="submit"
-          className="submit-button"
-          disabled={isSubmitting || isLoading}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.32, duration: 0.3 }}
-        >
-          {isLoading ? 'Logging in...' : 'Log In'}
-        </motion.button>
-        <GoogleButton />
-      </Form>
-    )}
-  </Formik>
 ));
 
 // OTP login form component
@@ -470,11 +402,15 @@ const RegistrationForm = memo(({ handleSubmit, isLoading, prefillMobile }) => (
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.36, duration: 0.4 }}
         >
-          <PasswordField 
-            name="password" 
-            errors={errors.password}
-            touched={touched.password}
+          <Field
+            name="password"
+            type="password"
+            placeholder="Password"
+            className="form-input"
           />
+          {errors.password && touched.password && (
+            <div className="error">{errors.password}</div>
+          )}
         </motion.div>
         <motion.button
           type="submit"
@@ -494,7 +430,6 @@ const RegistrationForm = memo(({ handleSubmit, isLoading, prefillMobile }) => (
 
 // Main login modal component
 export const LoginModal = ({ isOpen, onClose, redirectAfterLogin, onLoginSuccess }) => {
-  const [tab, setTab] = useState('password'); // 'password' or 'otp'
   const [showOtp, setShowOtp] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
@@ -595,6 +530,9 @@ export const LoginModal = ({ isOpen, onClose, redirectAfterLogin, onLoginSuccess
         localStorage.setItem('userId', user._id);
         localStorage.setItem('userName', user.userName);
         
+        // Reset user credits on successful login
+        resetUserCredits();
+        
         // Set user data for the success modal
         setUserData({
           userName: user.userName,
@@ -613,36 +551,6 @@ export const LoginModal = ({ isOpen, onClose, redirectAfterLogin, onLoginSuccess
       setIsLoading(false);
     }
   }, [mobileNumber, otpValue]);
-
-  // Handle password login
-  const handlePasswordLogin = useCallback(async (values, { setSubmitting }) => {
-    try {
-      setIsLoading(true);
-      
-      const response = await axios.post(SIGN_IN_URL, {
-        email: values.email,
-        password: values.password
-      });
-      
-      const { token, id } = response.data;
-      
-      // Store token and ID in localStorage
-      localStorage.setItem('token', token);
-      localStorage.setItem('userId', id);
-      
-      // Fetch user data
-      const userData = await fetchUserData(id);
-      setUserData(userData);
-      
-      // Show success modal
-      setShowSuccessModal(true);
-      setSubmitting(false);
-      
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Login failed. Please check your credentials.');
-      setIsLoading(false);
-    }
-  }, []);
   
   // Handle registration form submission
   const handleRegistration = useCallback(async (values, { setSubmitting }) => {
@@ -659,30 +567,15 @@ export const LoginModal = ({ isOpen, onClose, redirectAfterLogin, onLoginSuccess
       toast.success(response.data.message || 'Registration successful!');
       setSubmitting(false);
       
-      // Automatically log in the user after successful registration
+      // Reset user credits for the new user
+      resetUserCredits();
+      
+      // After registration, send OTP for login
       try {
-        const loginResponse = await axios.post(SIGN_IN_URL, {
-          email: values.email,
-          password: values.password
-        });
-        
-        const { token, id } = loginResponse.data;
-        
-        // Store token and ID in localStorage
-        localStorage.setItem('token', token);
-        localStorage.setItem('userId', id);
-        
-        // Fetch and store user data
-        const userData = await fetchUserData(id);
-        setUserData(userData);
-        
-        // Show success modal
-        setShowSuccessModal(true);
-        
-      } catch (loginError) {
-        console.error('Auto-login failed after registration:', loginError);
-        // Not showing this error to user since registration was successful
-        onClose(); // Close modal if login fails
+        await handleSendOtp(values.mobile || mobileNumber, () => {});
+        setMode('login');
+      } catch (otpError) {
+        console.error('Failed to send OTP after registration:', otpError);
       }
       
     } catch (error) {
@@ -690,11 +583,14 @@ export const LoginModal = ({ isOpen, onClose, redirectAfterLogin, onLoginSuccess
     } finally {
       setIsLoading(false);
     }
-  }, [onClose, mobileNumber]);
+  }, [handleSendOtp, mobileNumber]);
   
   // Final close handler (after success)
   const handleFinalClose = useCallback(() => {
     setShowSuccessModal(false);
+    
+    // Trigger a credits update before closing
+    triggerCreditsUpdate();
     
     // Call onLoginSuccess if provided
     if (onLoginSuccess) {
@@ -711,7 +607,6 @@ export const LoginModal = ({ isOpen, onClose, redirectAfterLogin, onLoginSuccess
   // Toggle between login and register modes
   const toggleMode = useCallback(() => {
     setMode(mode === 'login' ? 'register' : 'login');
-    setTab('password'); // Reset to password tab when switching modes
     setShowOtp(false); // Hide OTP input when switching modes
   }, [mode]);
 
@@ -732,72 +627,22 @@ export const LoginModal = ({ isOpen, onClose, redirectAfterLogin, onLoginSuccess
           
           <LogoHeader />
           
-          {/* Main Mode Switcher */}
-          {/* <motion.div
-            className="modal-tab-switcher main-mode-switcher"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12, duration: 0.4 }}
-          >
-            <button
-              className={`modal-tab-btn${mode === 'login' ? ' active' : ''}`}
-              onClick={() => setMode('login')}
-            >
-              Login
-            </button>
-            <button
-              className={`modal-tab-btn${mode === 'register' ? ' active' : ''}`}
-              onClick={() => setMode('register')}
-            >
-              Register
-            </button>
-          </motion.div> */}
-          
           {mode === 'login' ? (
             <>
-              {/* Login Tab Switcher */}
-              <motion.div
-                className="modal-tab-switcher"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.18, duration: 0.4 }}
-              >
-                <button
-                  className={`modal-tab-btn${tab === 'password' ? ' active' : ''}`}
-                  onClick={() => { setTab('password'); setShowOtp(false); }}
-                >
-                  Password
-                </button>
-                <button
-                  className={`modal-tab-btn${tab === 'otp' ? ' active' : ''}`}
-                  onClick={() => { setTab('otp'); setShowOtp(false); }}
-                >
-                  Login with OTP
-                </button>
-              </motion.div>
-              
               <Dialog.Title className="modal-title">
                 Welcome To Thumbnail Guru
               </Dialog.Title>
-              <div className="modal-subtitle">Please enter your credentials to login</div>
+              <div className="modal-subtitle">Please enter your phone number to login</div>
               
-              {/* Render appropriate form based on selected tab */}
-              {tab === 'password' ? (
-                <PasswordLoginForm 
-                  handleSubmit={handlePasswordLogin} 
-                  isLoading={isLoading} 
-                />
-              ) : (
-                <OtpLoginForm 
-                  handleSendOtp={handleSendOtp}
-                  handleVerifyOtp={handleVerifyOtp}
-                  showOtp={showOtp}
-                  otpValue={otpValue}
-                  setOtpValue={setOtpValue}
-                  otpTimer={otpTimer}
-                  isLoading={isLoading}
-                />
-              )}
+              <OtpLoginForm 
+                handleSendOtp={handleSendOtp}
+                handleVerifyOtp={handleVerifyOtp}
+                showOtp={showOtp}
+                otpValue={otpValue}
+                setOtpValue={setOtpValue}
+                otpTimer={otpTimer}
+                isLoading={isLoading}
+              />
               
               <div className="mode-switch-text">
                 Don't have an account? <button type="button" onClick={toggleMode} className="mode-switch-btn">Register now</button>
@@ -821,104 +666,6 @@ export const LoginModal = ({ isOpen, onClose, redirectAfterLogin, onLoginSuccess
               </div>
             </>
           )}
-        </Dialog.Panel>
-      </ModalWrapper>
-      
-      {/* Success Modal */}
-      <LoginSuccessModal 
-        isOpen={showSuccessModal} 
-        onClose={handleFinalClose}
-        userName={userData?.userName}
-      />
-    </>
-  );
-};
-
-// Registration modal component
-export const RegisterModal = ({ isOpen, onClose }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [userData, setUserData] = useState(null);
-  
-  // Handle registration form submission
-  const handleSubmit = useCallback(async (values, { setSubmitting }) => {
-    try {
-      setIsLoading(true);
-      
-      const response = await axios.post(SIGN_UP_URL, {
-        userName: values.name,
-        email: values.email,
-        password: values.password,
-        mobileNumber: values.mobile
-      });
-      
-      toast.success(response.data.message || 'Registration successful!');
-      setSubmitting(false);
-      
-      // Automatically log in the user after successful registration
-      try {
-        const loginResponse = await axios.post(SIGN_IN_URL, {
-          email: values.email,
-          password: values.password
-        });
-        
-        const { token, id } = loginResponse.data;
-        
-        // Store token and ID in localStorage
-        localStorage.setItem('token', token);
-        localStorage.setItem('userId', id);
-        
-        // Fetch and store user data
-        const userData = await fetchUserData(id);
-        setUserData(userData);
-        
-        // Show success modal
-        setShowSuccessModal(true);
-        
-      } catch (loginError) {
-        console.error('Auto-login failed after registration:', loginError);
-        // Not showing this error to user since registration was successful
-        onClose(); // Close modal if login fails
-      }
-      
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [onClose]);
-  
-  // Final close handler (after success)
-  const handleFinalClose = useCallback(() => {
-    setShowSuccessModal(false);
-    onClose();
-  }, [onClose]);
-
-  return (
-    <>
-      <ModalWrapper isOpen={isOpen && !showSuccessModal} onClose={onClose}>
-        <Dialog.Panel
-          as={motion.div}
-          className="modal-panel"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.35, type: 'spring', bounce: 0.18 }}
-        >
-          <button className="modal-close" onClick={onClose}>
-            <X size={24} />
-          </button>
-          
-          <LogoHeader />
-          
-          <Dialog.Title className="modal-title">
-            Create Account
-          </Dialog.Title>
-          
-          <RegistrationForm 
-            handleSubmit={handleSubmit}
-            isLoading={isLoading}
-          />
         </Dialog.Panel>
       </ModalWrapper>
       

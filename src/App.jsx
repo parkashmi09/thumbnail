@@ -9,7 +9,9 @@ import Editor from './pages/EditorPage.jsx';
 import Help from './pages/Help';
 import AboutUs from './pages/AboutUs';
 import RecentProjects from './pages/RecentProjects';
+import Pricing from './pages/Pricing';
 import { LoginModal } from './components/Auth/AuthModals.jsx';
+import { CreditsProvider } from './context/CreditsContext.jsx';
 
 // Auth protected route component
 const ProtectedRoute = ({ children }) => {
@@ -98,17 +100,20 @@ function App() {
 
   return (
     <BrowserRouter>
-      <CategoryProvider>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/recent-projects" element={<RecentProjects />} />
-          <Route path="/editor/:templateId" element={<EditorWithKey />} />
-          <Route path="/editor" element={<EditorWithKey />} />
-          <Route path="/help" element={<Help />} />
-          <Route path="/about" element={<AboutUs />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </CategoryProvider>
+      <CreditsProvider>
+        <CategoryProvider>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/recent-projects" element={<RecentProjects />} />
+            <Route path="/editor/:templateId" element={<EditorWithKey />} />
+            <Route path="/editor" element={<EditorWithKey />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/help" element={<Help />} />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </CategoryProvider>
+      </CreditsProvider>
     </BrowserRouter>
   );
 }

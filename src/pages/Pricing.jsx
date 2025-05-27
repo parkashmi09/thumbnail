@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { ShoppingCart, Check } from 'lucide-react';
+import { ShoppingCart, Check, Loader } from 'lucide-react';
 import Slider from 'react-slick';
 import './Pricing.css';
 import Header from '../components/Header/Header';
+import toast from 'react-hot-toast';
 
 // Make sure to install these packages:
 // npm install react-slick slick-carousel
@@ -10,7 +11,8 @@ import Header from '../components/Header/Header';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-const plans = [
+// Fallback plans in case API fails
+const fallbackPlans = [
   {
     badge: '15% OFF',
     price: '299/-',
@@ -23,6 +25,7 @@ const plans = [
     ],
     promo: true,
     popular: false,
+    name: "Basic Plan"
   },
   {
     badge: 'POPULAR',
@@ -37,6 +40,7 @@ const plans = [
     ],
     promo: true,
     popular: true,
+    name: "Popular Plan"
   },
   {
     badge: '30% OFF',
@@ -52,12 +56,19 @@ const plans = [
     ],
     promo: true,
     popular: false,
+    name: "Pro Plan"
   },
 ];
+
+// API endpoint for pricing plans
+const API_URL = 'https://api.thumbnailcreator.com';
 
 const Pricing = ({ isModal = false }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [promoCode, setPromoCode] = useState('');
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Function to check if viewport is mobile size
@@ -75,6 +86,47 @@ const Pricing = ({ isModal = false }) => {
     return () => {
       window.removeEventListener('resize', checkIsMobile);
     };
+  }, []);
+
+  // Fetch pricing plans from API
+  useEffect(() => {
+    const fetchPricingPlans = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_URL}/api/pricing-plans`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch pricing plans');
+        }
+        
+        const data = await response.json();
+        
+        // Transform API data to match the format needed for rendering
+        const formattedPlans = data.map(plan => ({
+          _id: plan._id,
+          name: plan.name,
+          badge: plan.name === 'Basic Plan' ? '15% OFF' : 
+                 plan.name === 'Popular Plan' ? 'POPULAR' : '30% OFF',
+          price: `${plan.offerPrice}/-`,
+          oldPrice: `${plan.price}/-`,
+          features: plan.features,
+          promo: true,
+          popular: plan.name === 'Popular Plan'
+        }));
+        
+        setPlans(formattedPlans);
+      } catch (error) {
+        console.error('Error fetching pricing plans:', error);
+        setError(error.message);
+        // Use fallback plans if API fails
+        setPlans(fallbackPlans);
+        toast.error('Could not load latest pricing. Showing default prices.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPricingPlans();
   }, []);
 
   // Slick slider settings
@@ -95,19 +147,82 @@ const Pricing = ({ isModal = false }) => {
     focusOnSelect: true,
   };
 
-  const handlePromoChange = (e, idx) => {
+  const handlePromoChange = (e) => {
     setPromoCode(e.target.value);
   };
 
-  const handleBuyNow = (plan) => {
-    // Handle purchase logic
-    alert(`You've selected the ${plan.price} plan!`);
+  const handleBuyNow = async (plan) => {
+    try {
+      // Get user info from localStorage
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+      
+      if (!userId || !token) {
+        toast.error('Please login to purchase a plan');
+        return;
+      }
+      
+      // Prepare request for payment initiation
+      const paymentData = {
+        userId,
+        planId: plan._id,
+        promoCode: promoCode || null
+      };
+      
+      // Show loading state
+      toast.loading('Initializing payment...');
+      
+      // Make API request to initiate payment
+      const response = await fetch(`${API_URL}/api/payments/initiate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(paymentData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to initiate payment');
+      }
+      
+      const { paymentUrl, orderId } = await response.json();
+      
+      // Store order ID in localStorage for verification after payment
+      localStorage.setItem('currentOrderId', orderId);
+      
+      // Redirect to payment gateway
+      window.location.href = paymentUrl;
+      
+    } catch (error) {
+      console.error('Payment initiation failed:', error);
+      toast.dismiss();
+      toast.error('Payment initiation failed. Please try again.');
+    }
   };
 
   const renderPricingCards = () => {
+    if (loading) {
+      return (
+        <div className="pricing-loading">
+          <Loader size={40} className="spinner" />
+          <p>Loading pricing plans...</p>
+        </div>
+      );
+    }
+
+    if (error && plans.length === 0) {
+      return (
+        <div className="pricing-error">
+          <p>Failed to load pricing plans. Please try again later.</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      );
+    }
+
     return plans.map((plan, idx) => (
       <div
-        key={idx}
+        key={plan._id || idx}
         className={
           "pricing-card" + (plan.popular ? " popular" : "")
         }
@@ -121,7 +236,10 @@ const Pricing = ({ isModal = false }) => {
         <div className="pricing-oldprice">{plan.oldPrice}</div>
         <ul className="pricing-features">
           {plan.features.map((feature, i) => (
-            <li key={i}>{feature}</li>
+            <li key={i}>
+              <Check size={16} className="feature-icon" />
+              {feature}
+            </li>
           ))}
         </ul>
         <div className="pricing-promo-bar">PROMO CODE</div>
@@ -129,7 +247,7 @@ const Pricing = ({ isModal = false }) => {
           type="text"
           placeholder="THUMBNAIL10"
           className="pricing-promo"
-          onChange={(e) => handlePromoChange(e, idx)}
+          onChange={handlePromoChange}
           value={promoCode}
         />
         <button 

@@ -1,25 +1,36 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Header.css';
-import { Menu, X, User, LogOut, Home, Settings, Info, Star, HelpCircle, Crown, Clock } from 'lucide-react';
+import { Menu, X, User, LogOut, Home, Settings, Info, Star, HelpCircle, Crown, Clock, Coins } from 'lucide-react';
 import { Popover } from '@headlessui/react';
 import logo from '../../assets/images/LOGO.png';
-import { LoginModal, RegisterModal } from '../Auth/AuthModals';
+import { LoginModal } from '../Auth/AuthModals';
 import { Toaster } from 'react-hot-toast';
 import ProfileModal from '../ProfileModal/ProfileModal';
 import PricingModal from '../PricingModal/PricingModal';
+import { useCreditsContext } from '../../context/CreditsContext';
 
 const Header = () => {
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const drawerRef = useRef(null);
   const overlayRef = useRef(null);
+  
+  // Use the credits context
+  const { credits } = useCreditsContext();
+
+  // Force component to re-render when credits change
+  const [, setForceUpdate] = useState(0);
+  
+  // Listen for credit updates
+  useEffect(() => {
+    setForceUpdate(prev => prev + 1);
+  }, [credits]);
 
   useEffect(() => {
     // Check if user is logged in
@@ -33,7 +44,7 @@ const Header = () => {
         name: userName || 'User',
       });
     }
-  }, [isLoginOpen, isRegisterOpen]); // Re-check when auth modals close
+  }, [isLoginOpen, credits]); // Also check when credits change
 
   useEffect(() => {
     // Function to check if viewport is mobile size
@@ -137,11 +148,6 @@ const Header = () => {
     setIsLoginOpen(true);
   };
 
-  const handleOpenRegister = () => {
-    closeDrawer();
-    setIsRegisterOpen(true);
-  };
-
   return (
     <div className="header-container">
       <Toaster position="top-center" />
@@ -177,63 +183,73 @@ const Header = () => {
             </button>
             
             {user ? (
-              <Popover className="user-popover">
-                {({ open }) => (
-                  <>
-                    <Popover.Button className="user-button">
-                      <div className="user-avatar">
-                        <User size={18} />
-                      </div>
-                      <span className="user-name">{user.name}</span>
-                    </Popover.Button>
-
-                    {open && (
-                      <div className="backdrop" aria-hidden="true" />
-                    )}
-
-                    <Popover.Panel className="user-panel">
-                      <div className="panel-header">
-                        <span>{user.name}</span>
-                      </div>
-                      <div className="panel-content">
-                        <button className="panel-item" onClick={goToRecentProjects}>
-                          <Clock size={18} />
-                          <span>Recent Projects</span>
-                        </button>
-                        
-                        <button className="panel-item" onClick={goToProfile}>
+              <>
+                {/* Credits display */}
+                <div className="credits-display">
+                  <Coins size={16} className="coins-icon" />
+                  <span>{credits} credits</span>
+                </div>
+                
+                <Popover className="user-popover">
+                  {({ open }) => (
+                    <>
+                      <Popover.Button className="user-button">
+                        <div className="user-avatar">
                           <User size={18} />
-                          <span>Profile Settings</span>
-                        </button>
-                        
-                        <button className="panel-item" onClick={goToHelp}>
-                          <HelpCircle size={18} />
-                          <span>Help</span>
-                        </button>
-                        
-                        <button className="panel-item" onClick={goToAbout}>
-                          <Info size={18} />
-                          <span>About Us</span>
-                        </button>
-                        
-                        <div className="panel-divider"></div>
-                        
-                        <button className="logout-button" onClick={handleLogout}>
-                          <LogOut size={20} />
-                          <span>LOGOUT</span>
-                        </button>
-                      </div>
-                    </Popover.Panel>
-                  </>
-                )}
-              </Popover>
+                        </div>
+                        <span className="user-name">{user.name}</span>
+                      </Popover.Button>
+
+                      {open && (
+                        <div className="backdrop" aria-hidden="true" />
+                      )}
+
+                      <Popover.Panel className="user-panel">
+                        <div className="panel-header">
+                          <span>{user.name}</span>
+                        </div>
+                        <div className="panel-content">
+                          <div className="credits-info">
+                            <Coins size={16} className="coins-icon" />
+                            <span>{credits} credits available</span>
+                          </div>
+                          
+                          <button className="panel-item" onClick={goToRecentProjects}>
+                            <Clock size={18} />
+                            <span>Recent Projects</span>
+                          </button>
+                          
+                          <button className="panel-item" onClick={goToProfile}>
+                            <User size={18} />
+                            <span>Profile Settings</span>
+                          </button>
+                          
+                          <button className="panel-item" onClick={goToHelp}>
+                            <HelpCircle size={18} />
+                            <span>Help</span>
+                          </button>
+                          
+                          <button className="panel-item" onClick={goToAbout}>
+                            <Info size={18} />
+                            <span>About Us</span>
+                          </button>
+                          
+                          <div className="panel-divider"></div>
+                          
+                          <button className="logout-button" onClick={handleLogout}>
+                            <LogOut size={20} />
+                            <span>LOGOUT</span>
+                          </button>
+                        </div>
+                      </Popover.Panel>
+                    </>
+                  )}
+                </Popover>
+              </>
             ) : (
               <>
                 <button className="login-btn" onClick={() => setIsLoginOpen(true)}>
-                  LOG IN
-                </button>
-                <button className="register-btn" onClick={() => setIsRegisterOpen(true)}>
-                  REGISTER NOW
+                  LOG IN / REGISTER
                 </button>
               </>
             )}
@@ -243,6 +259,12 @@ const Header = () => {
         {/* Menu Toggle for Mobile - Only shown on mobile screens */}
         {isMobile && (
           <div className='menu-container'>
+            {user && (
+              <div className="credits-display-mobile">
+                <Coins size={14} className="coins-icon" />
+                <span>{credits}</span>
+              </div>
+            )}
             <button 
               className="pro-button-mobile"
               onClick={openPricingModal}
@@ -289,6 +311,10 @@ const Header = () => {
                 <div className="drawer-item user-info-mobile">
                   <User size={20} />
                   <span>{user.name}</span>
+                </div>
+                <div className="drawer-item credits-info-mobile">
+                  <Coins size={20} />
+                  <span>{credits} credits available</span>
                 </div>
                 <button className="drawer-item" onClick={goToHome}>
                   <Home size={20} />
@@ -359,14 +385,7 @@ const Header = () => {
                   onClick={handleOpenLogin}
                 >
                   <User size={20} />
-                  <span>LOG IN</span>
-                </button>
-                <button 
-                  className="drawer-item register-btn-mobile" 
-                  onClick={handleOpenRegister}
-                >
-                  <User size={20} />
-                  <span>REGISTER NOW</span>
+                  <span>LOG IN / REGISTER</span>
                 </button>
               </div>
               
@@ -388,10 +407,6 @@ const Header = () => {
       <LoginModal 
         isOpen={isLoginOpen} 
         onClose={() => setIsLoginOpen(false)} 
-      />
-      <RegisterModal 
-        isOpen={isRegisterOpen} 
-        onClose={() => setIsRegisterOpen(false)} 
       />
       <ProfileModal
         isOpen={isProfileModalOpen}

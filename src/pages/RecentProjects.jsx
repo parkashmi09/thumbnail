@@ -161,25 +161,36 @@ const RecentProjects = () => {
         <div className="projects-content">
           {projects.length === 0 ? (
             <div className="empty-state">
+              <div className="empty-state-decoration top-left"></div>
+              <div className="empty-state-decoration bottom-right"></div>
+              
               <div className="empty-state-icon">
-                <FolderOpen size={80} />
+                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="main-icon">
+                  <path d="M9 22H15C20 22 22 20 22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22Z" stroke="#00a67e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M9 10C10.1046 10 11 9.10457 11 8C11 6.89543 10.1046 6 9 6C7.89543 6 7 6.89543 7 8C7 9.10457 7.89543 10 9 10Z" stroke="#00a67e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M2.67 18.95L7.6 15.64C8.39 15.11 9.53 15.17 10.24 15.78L10.57 16.07C11.35 16.74 12.61 16.74 13.39 16.07L17.55 12.5C18.33 11.83 19.59 11.83 20.37 12.5L22 13.9" stroke="#00a67e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="plus-icon">
+                  <path d="M6 12H18" stroke="#00a67e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 18V6" stroke="#00a67e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
-              <h2>No Recent Projects</h2>
-              <p>
-                You haven't created any designs yet. Start your first project!
-              </p>
+              
+              <h2>No Projects Yet</h2>
+              <p>Create your first thumbnail design to get started</p>
               <button className="empty-state-btn" onClick={handleCreateNew}>
-                <Plus size={20} />
-                Create Your First Design
+                <Plus size={18} />
+                Create Design
               </button>
             </div>
           ) : (
             <>
               <div className="projects-header">
                 <h2>Your Designs ({projects.length})</h2>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                {/* <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                   <p>Click on any design to continue editing</p>
-                  {/* {projects.length > 0 && (
+                  {projects.length > 0 && (
                     <button 
                       onClick={handleDeleteAllProjects}
                       style={{
@@ -197,8 +208,8 @@ const RecentProjects = () => {
                       <Trash2 size={16} />
                       Delete All
                     </button>
-                  )} */}
-                </div>
+                  )}
+                </div> */}
               </div>
 
               <div className="projects-container">
