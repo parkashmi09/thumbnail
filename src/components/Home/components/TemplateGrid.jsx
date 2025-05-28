@@ -124,7 +124,7 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
       setShowLoginModal(true);
       return;
     }
-    window.location.href = `/editor/${template._id}`;
+   navigate(`/editor/${template._id}`);
   };
   
   // Handle view details click
