@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import './TemplateDetailsModal.css';
 import { LoginModal } from '../../Auth/AuthModals';
+import { useNavigate } from 'react-router-dom';
 
 const TemplateDetailsModal = ({ template, onClose }) => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showDetails, setShowDetails] = useState(true);
+  const navigate = useNavigate();
 
   if (!template) return null;
 
