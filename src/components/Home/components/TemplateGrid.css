@@ -52,12 +52,13 @@
   color: white;
   padding: 0;
 }
-
+/* 
 .template-card:hover .view-details-btn {
   opacity: 1;
-}
+} */
 
-.view-details-btn:hover {
+.view-details-btn{
+  opacity: 1;
   transform: scale(1.1);
   background: rgba(0, 0, 0, 0.7);
 }
