@@ -10,12 +10,11 @@ import TemplateDetailsModal from './TemplateDetailsModal';
 const getImageUrl = (path) => {
   return path;
 };
-const navigate = useNavigate();
 
 // Template Modal Component
 const TemplateModal = ({ template, onClose }) => {
   if (!template) return null;
-
+  
   return (
     <div className="template-modal-overlay" onClick={onClose}>
       <div className="template-modal-content" onClick={e => e.stopPropagation()}>
@@ -43,7 +42,7 @@ const TemplateModal = ({ template, onClose }) => {
               src={template.previewPath} 
               alt={template.name}
               className="modal-preview-img"
-            />
+              />
           </div>
           <button className="use-template-btn" onClick={() => navigate(`/editor/${template._id}`)}>
             Use this Template
@@ -58,12 +57,12 @@ const TemplateModal = ({ template, onClose }) => {
 const TemplateSkeleton = ({ count = 40 }) => {
   return Array(count).fill(0).map((_, index) => (
     <div 
-      className="template-card skeleton-card" 
-      key={`skeleton-${index}`}
-      style={{ 
-        "--item-index": index,
-        animation: `fadeInUp 0.5s ease forwards ${index * 0.05}s`
-      }}
+    className="template-card skeleton-card" 
+    key={`skeleton-${index}`}
+    style={{ 
+      "--item-index": index,
+      animation: `fadeInUp 0.5s ease forwards ${index * 0.05}s`
+    }}
     >
       <div className="skeleton-img"></div>
     </div>
@@ -99,6 +98,7 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
   const [showLoginModal, setShowLoginModal] = useState(false);
   const scrollContainerRef = useRef(null);
   
+  const navigate = useNavigate();
   // Check if user is logged in
   const isUserLoggedIn = () => {
     return localStorage.getItem('token') && localStorage.getItem('userId');
