@@ -137,6 +137,7 @@ body {
   display: flex;
   transition: transform 0.3s ease;
   gap: 8px;
+
 }
 
 .category-item {
@@ -145,6 +146,7 @@ body {
   align-items: center;
   min-width: 0;
   color: #fff;
+  z-index: 1000;
   font-weight: 700;
   font-size: 0.8rem;
   gap: 4px;
@@ -758,8 +760,8 @@ body {
     transition: transform 0.5s cubic-bezier(.4,0,.2,1);
   }
   .category-item {
-    flex: 0 0 33.3333%;
-    max-width: 33.3333%;
+    flex: 0 0 23.3333%;
+    max-width: 23.3333%;
     box-sizing: border-box;
   }
 
