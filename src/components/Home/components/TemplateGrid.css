@@ -13,37 +13,191 @@
 }
 
 /* Template cards */
-.template-grid .template-card {
-  opacity: 1 !important;
-  visibility: visible !important;
-  display: block !important;
+.template-card-wrapper {
+  position: relative;
+  cursor: pointer;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  width: 100%;
   aspect-ratio: 16/9;
-  text-decoration: none;
-  background-color: #f0f0f0;
 }
 
-.template-grid .template-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+.template-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #f0f0f0;
+  transition: transform 0.3s ease;
+}
+
+.template-card:hover {
+  transform: scale(1.02);
+}
+
+/* View details button */
+.view-details-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.2s ease;
+  color: white;
+  padding: 0;
+}
+
+.template-card:hover .view-details-btn {
+  opacity: 1;
+}
+
+.view-details-btn:hover {
+  transform: scale(1.1);
+  background: rgba(0, 0, 0, 0.7);
 }
 
 /* Image styles */
 .template-img {
   width: 100%;
   height: 100%;
-  aspect-ratio: 16/9;
   object-fit: cover;
-  display: block !important;
+  display: block;
   border-radius: 8px;
   background-color: #f0f0f0;
 }
 
-/* Skeleton card styles */
+/* Modal styles */
+.template-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.template-modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 900px;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.modal-close-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.template-modal-content h2 {
+  font-size: 24px;
+  margin: 0 0 24px;
+  padding-right: 40px;
+  color: #333;
+}
+
+.template-details {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.template-info {
+  display: grid;
+  gap: 16px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.info-row .label {
+  color: #666;
+  min-width: 160px;
+}
+
+.info-row .value {
+  color: #333;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pro-badge {
+  background: #FFB800;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.template-preview {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 16/9;
+  background: #f0f0f0;
+}
+
+.modal-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.use-template-btn {
+  background: #1976d2;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.use-template-btn:hover {
+  background: #1565c0;
+  transform: translateY(-2px);
+}
+
+/* Skeleton and loader styles */
 .skeleton-card {
   background: #ffffff;
   box-shadow: none;
@@ -78,7 +232,6 @@
 
 .circular-loader {
   display: flex;
-  flex-direction: column;
   align-items: center;
   background-color: rgba(255, 255, 255, 0.8);
   border-radius: 10px;
@@ -98,68 +251,19 @@
   animation: dash 1.5s ease-in-out infinite;
 }
 
-/* InfiniteScroll Container */
-.template-scroll-container {
-  width: 100%;
-  overflow-y: auto !important;
-  overflow-x: hidden;
-  height: calc(100vh - 300px);
-  min-height: 500px;
-  padding-bottom: 120px;
-  position: relative;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-}
-
-.infinite-scroll-component {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-  overflow-y: visible !important;
-  overflow-x: hidden;
-  min-height: 200px;
-  width: 100% !important;
-}
-
-.infinite-scroll-component__outerdiv {
-  width: 100%;
-}
-
-/* Scroll detector */
-.scroll-detector {
-  width: 100%;
-  height: 200px;
-  visibility: hidden;
-  position: absolute;
-  bottom: 200px;
-  left: 0;
-  pointer-events: all;
-  z-index: 100;
-}
-
-/* Animation keyframes */
+/* Animations */
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 @keyframes pulse {
-  0%, 100% {
-    opacity: 0.8;
-  }
-  50% {
-    opacity: 1;
-  }
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
 }
 
 @keyframes rotate {
-  100% {
-    transform: rotate(360deg);
-  }
+  100% { transform: rotate(360deg); }
 }
 
 @keyframes dash {
@@ -190,12 +294,20 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
   }
+  
+  .template-modal-content {
+    max-width: 800px;
+  }
 }
 
 @media (max-width: 1100px) {
   .template-grid-five, .infinite-scroll-component {
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
+  }
+  
+  .template-modal-content {
+    max-width: 700px;
   }
 }
 
@@ -204,12 +316,33 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
+  
+  .template-modal-content {
+    padding: 16px;
+  }
+  
+  .template-modal-content h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+  
+  .info-row .label {
+    min-width: 120px;
+  }
 }
 
 @media (max-width: 480px) {
   .template-grid-five, .infinite-scroll-component {
     grid-template-columns: repeat(1, 1fr);
     gap: 12px;
+  }
+  
+  .template-modal-content {
+    padding: 12px;
+  }
+  
+  .template-details {
+    gap: 16px;
   }
 }
 

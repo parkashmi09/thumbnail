@@ -1,13 +1,56 @@
 import React, { memo, useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, RefreshCw } from 'lucide-react';
+import { Search, RefreshCw, Eye, X } from 'lucide-react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import './TemplateGrid.css';
 import { LoginModal } from '../../Auth/AuthModals';
+import TemplateDetailsModal from './TemplateDetailsModal';
 
 // Helper function to create image URL with cache busting
 const getImageUrl = (path) => {
   return path;
+};
+
+// Template Modal Component
+const TemplateModal = ({ template, onClose }) => {
+  if (!template) return null;
+
+  return (
+    <div className="template-modal-overlay" onClick={onClose}>
+      <div className="template-modal-content" onClick={e => e.stopPropagation()}>
+        <button className="modal-close-btn" onClick={onClose}>
+          <X size={24} />
+        </button>
+        <h2>{template.name}</h2>
+        <div className="template-details">
+          <div className="template-info">
+            <div className="info-row">
+              <span className="label">Template Type:</span>
+              <span className="value">Pro Templates <span className="pro-badge">Pro</span></span>
+            </div>
+            <div className="info-row">
+              <span className="label">Template Category:</span>
+              <span className="value">Top Creator</span>
+            </div>
+            <div className="info-row">
+              <span className="label">Template Dimensions:</span>
+              <span className="value">{template.width} x {template.height} px</span>
+            </div>
+          </div>
+          <div className="template-preview">
+            <img 
+              src={template.previewPath} 
+              alt={template.name}
+              className="modal-preview-img"
+            />
+          </div>
+          <button className="use-template-btn" onClick={() => window.location.href = `/editor/${template._id}`}>
+            Use this Template
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 // Skeleton loader component for templates
@@ -50,11 +93,16 @@ const ErrorMessage = ({ onRefresh }) => (
 
 const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearching }) => {
   const [hasError, setHasError] = useState(false);
-  console.log(templates,"templates");
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const scrollContainerRef = useRef(null);
   
+  // Check if user is logged in
+  const isUserLoggedIn = () => {
+    return localStorage.getItem('token') && localStorage.getItem('userId');
+  };
+
   // Handle refresh when error occurs
   const handleRefresh = () => {
     setHasError(false);
@@ -68,34 +116,40 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
     }
   };
   
-  // Check if user is logged in
-  const isUserLoggedIn = () => {
-    return localStorage.getItem('token') && localStorage.getItem('userId');
-  };
-  
-  // Handle template click
-  const handleTemplateClick = (e, template) => {
+  // Handle template click - check auth first
+  const handleTemplateClick = (template) => {
     if (!isUserLoggedIn()) {
-      e.preventDefault();
       setSelectedTemplate(template);
-      setShowAuthModal(true);
+      setShowLoginModal(true);
+      return;
     }
+    window.location.href = `/editor/${template._id}`;
   };
   
-  // Handle auth modal close
-  const handleAuthModalClose = () => {
-    setShowAuthModal(false);
+  // Handle view details click
+  const handleViewDetails = (e, template) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedTemplate(template);
+    setShowTemplateModal(true);
+  };
+  
+  // Handle template modal close
+  const handleTemplateModalClose = () => {
+    setShowTemplateModal(false);
     setSelectedTemplate(null);
   };
-  
+
+  // Handle login modal close
+  const handleLoginModalClose = () => {
+    setShowLoginModal(false);
+    setSelectedTemplate(null);
+  };
+
   // Handle successful login
   const handleLoginSuccess = () => {
-    setShowAuthModal(false);
     if (selectedTemplate) {
       window.location.href = `/editor/${selectedTemplate._id}`;
-      if (selectedTemplate.routingData) {
-        sessionStorage.setItem('templateRoutingData', JSON.stringify(selectedTemplate.routingData));
-      }
     }
   };
 
@@ -143,28 +197,26 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
           style={{ overflow: 'visible', width: '100%' }}
         >
           {templates && templates.map((tpl, index) => (
-            <Link
-              to={`/editor/${tpl._id}`}
-              state={{ routingData: tpl.routingData }}
-              className="template-card"
+            <div 
+              className="template-card-wrapper"
               key={tpl._id}
-              style={{ 
-                "--item-index": index,
-                opacity: 1,
-                visibility: 'visible'
-              }}
-              onClick={(e) => handleTemplateClick(e, tpl)}
+              onClick={() => handleTemplateClick(tpl)}
             >
-              <img
-                src={getImageUrl(tpl.previewPath)}
-                alt={tpl.name || 'Template'}
-                className="template-img"
-                loading="lazy"
-                style={{ 
-                  crossOrigin: "anonymous"
-                }}
-              />
-            </Link>
+              <div className="template-card">
+                <img
+                  src={tpl.previewPath}
+                  alt={tpl.name}
+                  className="template-img"
+                  loading="lazy"
+                />
+                <button 
+                  className="view-details-btn"
+                  onClick={(e) => handleViewDetails(e, tpl)}
+                >
+                  <Eye size={20} />
+                </button>
+              </div>
+            </div>
           ))}
         </InfiniteScroll>
         
@@ -178,10 +230,18 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
         )}
       </div>
       
-      {/* Auth Modal for login */}
+      {/* Template Modal */}
+      {showTemplateModal && (
+        <TemplateDetailsModal 
+          template={selectedTemplate} 
+          onClose={handleTemplateModalClose}
+        />
+      )}
+
+      {/* Login Modal */}
       <LoginModal 
-        isOpen={showAuthModal} 
-        onClose={handleAuthModalClose}
+        isOpen={showLoginModal}
+        onClose={handleLoginModalClose}
         onLoginSuccess={handleLoginSuccess}
         redirectAfterLogin={selectedTemplate ? `/editor/${selectedTemplate._id}` : null}
       />
