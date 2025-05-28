@@ -21,7 +21,7 @@ const TemplateDetailsModal = ({ template, onClose }) => {
       setShowLoginModal(true);
       return;
     }
-    window.location.href = `/editor/${template._id}`;
+    navigate(`/editor/${template._id}`);
   };
 
   // Handle login modal close
@@ -32,7 +32,7 @@ const TemplateDetailsModal = ({ template, onClose }) => {
 
   // Handle successful login
   const handleLoginSuccess = () => {
-    window.location.href = `/editor/${template._id}`;
+    navigate(`/editor/${template._id}`);
   };
 
   return (

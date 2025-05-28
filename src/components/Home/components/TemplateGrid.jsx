@@ -1,5 +1,5 @@
 import React, { memo, useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, RefreshCw, Eye, X } from 'lucide-react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import './TemplateGrid.css';
@@ -10,6 +10,7 @@ import TemplateDetailsModal from './TemplateDetailsModal';
 const getImageUrl = (path) => {
   return path;
 };
+const navigate = useNavigate();
 
 // Template Modal Component
 const TemplateModal = ({ template, onClose }) => {
@@ -44,7 +45,7 @@ const TemplateModal = ({ template, onClose }) => {
               className="modal-preview-img"
             />
           </div>
-          <button className="use-template-btn" onClick={() => window.location.href = `/editor/${template._id}`}>
+          <button className="use-template-btn" onClick={() => navigate(`/editor/${template._id}`)}>
             Use this Template
           </button>
         </div>
@@ -149,7 +150,8 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
   // Handle successful login
   const handleLoginSuccess = () => {
     if (selectedTemplate) {
-      window.location.href = `/editor/${selectedTemplate._id}`;
+      // window.location.href = `/editor/${selectedTemplate._id}`;
+      navigate(`/editor/${selectedTemplate._id}`);
     }
   };
 
