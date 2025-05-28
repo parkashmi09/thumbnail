@@ -730,8 +730,8 @@ body {
   }
 
   .cat-icon {
-    width: 40px;
-    height: 40px;
+    width: 70px;
+    height: 70px;
   }
 
   .logo {
@@ -860,7 +860,7 @@ body {
   }
   
   .category-item {
-    flex: 0 0 33.333%;
+    flex: 0 0 23.333%;
     padding: 0 4px;
     box-sizing: border-box;
   }
