@@ -3,16 +3,15 @@ import { Link } from 'react-router-dom';
 import { Search, RefreshCw } from 'lucide-react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import './TemplateGrid.css';
-import Loader from '../../Loader';
 import { LoginModal } from '../../Auth/AuthModals';
 
 // Helper function to create image URL with cache busting
 const getImageUrl = (path) => {
-  return `${path}?_=${new Date().getTime()}`;
+  return path;
 };
 
 // Skeleton loader component for templates
-const TemplateSkeleton = ({ count = 10 }) => {
+const TemplateSkeleton = ({ count = 40 }) => {
   return Array(count).fill(0).map((_, index) => (
     <div 
       className="template-card skeleton-card" 
@@ -34,15 +33,7 @@ const BottomLoader = () => (
       <svg className="spinner" viewBox="0 0 50 50">
         <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4"></circle>
       </svg>
-      <div className="loading-text">Loading more templates...</div>
     </div>
-  </div>
-);
-
-// End message when there are no more templates
-const EndMessage = () => (
-  <div className="end-message">
-    <p>You've seen all templates!</p>
   </div>
 );
 
@@ -58,43 +49,12 @@ const ErrorMessage = ({ onRefresh }) => (
 );
 
 const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearching }) => {
-  const [showSkeletons, setShowSkeletons] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  console.log(templates,"templates");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [loadedImages, setLoadedImages] = useState({});
   const scrollContainerRef = useRef(null);
   
-  // Check if we have templates data to render
-  useEffect(() => {
-    if (templates && templates.length > 0) {
-      setShowSkeletons(false);
-      setHasError(false);
-    } else if (!loading && (!templates || templates.length === 0)) {
-      setShowSkeletons(false);
-    } else if (loading) {
-      setShowSkeletons(true);
-    }
-  }, [templates, loading]);
-
-  // Reset loaded images state when templates change
-  useEffect(() => {
-    if (templates && templates.length > 0) {
-      // Initialize with false values for all template IDs
-      const initialLoadState = {};
-      templates.forEach(tpl => {
-        initialLoadState[tpl._id] = false;
-      });
-      setLoadedImages(initialLoadState);
-    }
-  }, [templates]);
-
-  // Track loading state
-  useEffect(() => {
-    setIsLoadingMore(loading && templates && templates.length > 0);
-  }, [loading, templates]);
-
   // Handle refresh when error occurs
   const handleRefresh = () => {
     setHasError(false);
@@ -104,7 +64,6 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
   // Handle load more with loading state
   const handleLoadMore = () => {
     if (!loading && hasMore) {
-      setIsLoadingMore(true);
       onLoadMore();
     }
   };
@@ -132,40 +91,19 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
   // Handle successful login
   const handleLoginSuccess = () => {
     setShowAuthModal(false);
-    // Redirect to editor with the template ID
     if (selectedTemplate) {
-      // Using navigate would be better, but for a direct redirect:
       window.location.href = `/editor/${selectedTemplate._id}`;
-      // Store routingData in sessionStorage for access after redirect
       if (selectedTemplate.routingData) {
         sessionStorage.setItem('templateRoutingData', JSON.stringify(selectedTemplate.routingData));
       }
     }
   };
 
-  // Handle image load
-  const handleImageLoad = (templateId) => {
-    setLoadedImages(prev => ({
-      ...prev,
-      [templateId]: true
-    }));
-  };
-
-  // Handle image error
-  const handleImageError = (templateId) => {
-    console.error(`Failed to load image for template: ${templateId}`);
-    // Mark as loaded to remove loading placeholder
-    setLoadedImages(prev => ({
-      ...prev,
-      [templateId]: true
-    }));
-  };
-
   // Show skeleton loader when loading initially and no templates are available
   if ((loading && (!templates || templates.length === 0)) || isSearching) {
     return (
       <div className="template-grid template-grid-five">
-        <TemplateSkeleton count={10} />
+        <TemplateSkeleton count={40} />
       </div>
     );
   }
@@ -195,8 +133,7 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
           dataLength={templates.length}
           next={handleLoadMore}
           hasMore={hasMore}
-          loader={<Loader/>}
-          // endMessage={hasMore ? null : <EndMessage />}
+          loader={<BottomLoader />}
           scrollThreshold={0.85}
           className="template-grid template-grid-five"
           onError={() => setHasError(true)}
@@ -218,22 +155,15 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
               }}
               onClick={(e) => handleTemplateClick(e, tpl)}
             >
-              {!loadedImages[tpl._id] && (
-                <div className="template-img-placeholder skeleton-img"></div>
-              )}
               <img
                 src={getImageUrl(tpl.previewPath)}
                 alt={tpl.name || 'Template'}
                 className="template-img"
                 loading="lazy"
-                onLoad={() => handleImageLoad(tpl._id)}
-                onError={() => handleImageError(tpl._id)}
                 style={{ 
-                  display: loadedImages[tpl._id] ? 'block' : 'none',
                   crossOrigin: "anonymous"
                 }}
               />
-              <div className="template-name">{tpl.name}</div>
             </Link>
           ))}
         </InfiniteScroll>
