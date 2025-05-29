@@ -5,6 +5,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import './TemplateGrid.css';
 import { LoginModal } from '../../Auth/AuthModals';
 import TemplateDetailsModal from './TemplateDetailsModal';
+import Loader from '../../Loader';
 
 // Helper function to create image URL with cache busting
 const getImageUrl = (path) => {
@@ -14,10 +15,10 @@ const getImageUrl = (path) => {
 // Template Modal Component
 const TemplateModal = ({ template, onClose }) => {
   if (!template) return null;
-  
+
   return (
     <div className="template-modal-overlay" onClick={onClose}>
-      <div className="template-modal-content" onClick={e => e.stopPropagation()}>
+      <div className="template-modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close-btn" onClick={onClose}>
           <X size={24} />
         </button>
@@ -26,7 +27,9 @@ const TemplateModal = ({ template, onClose }) => {
           <div className="template-info">
             <div className="info-row">
               <span className="label">Template Type:</span>
-              <span className="value">Pro Templates <span className="pro-badge">Pro</span></span>
+              <span className="value">
+                Pro Templates <span className="pro-badge">Pro</span>
+              </span>
             </div>
             <div className="info-row">
               <span className="label">Template Category:</span>
@@ -34,17 +37,22 @@ const TemplateModal = ({ template, onClose }) => {
             </div>
             <div className="info-row">
               <span className="label">Template Dimensions:</span>
-              <span className="value">{template.width} x {template.height} px</span>
+              <span className="value">
+                {template.width} x {template.height} px
+              </span>
             </div>
           </div>
           <div className="template-preview">
-            <img 
-              src={template.previewPath} 
+            <img
+              src={template.previewPath}
               alt={template.name}
               className="modal-preview-img"
-              />
+            />
           </div>
-          <button className="use-template-btn" onClick={() => navigate(`/editor/${template._id}`)}>
+          <button
+            className="use-template-btn"
+            onClick={() => navigate(`/editor/${template._id}`)}
+          >
             Use this Template
           </button>
         </div>
@@ -55,18 +63,20 @@ const TemplateModal = ({ template, onClose }) => {
 
 // Skeleton loader component for templates
 const TemplateSkeleton = ({ count = 40 }) => {
-  return Array(count).fill(0).map((_, index) => (
-    <div 
-    className="template-card skeleton-card" 
-    key={`skeleton-${index}`}
-    style={{ 
-      "--item-index": index,
-      animation: `fadeInUp 0.5s ease forwards ${index * 0.05}s`
-    }}
-    >
-      <div className="skeleton-img"></div>
-    </div>
-  ));
+  return Array(count)
+    .fill(0)
+    .map((_, index) => (
+      <div
+        className="template-card skeleton-card"
+        key={`skeleton-${index}`}
+        style={{
+          '--item-index': index,
+          animation: `fadeInUp 0.5s ease forwards ${index * 0.05}s`,
+        }}
+      >
+        <div className="skeleton-img"></div>
+      </div>
+    ));
 };
 
 // Bottom loading indicator when fetching next batch
@@ -74,7 +84,14 @@ const BottomLoader = () => (
   <div className="circular-loader-container">
     <div className="circular-loader">
       <svg className="spinner" viewBox="0 0 50 50">
-        <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4"></circle>
+        <circle
+          className="path"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          strokeWidth="4"
+        ></circle>
       </svg>
     </div>
   </div>
@@ -96,9 +113,8 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const scrollContainerRef = useRef(null);
-  
   const navigate = useNavigate();
+
   // Check if user is logged in
   const isUserLoggedIn = () => {
     return localStorage.getItem('token') && localStorage.getItem('userId');
@@ -116,7 +132,7 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
       onLoadMore();
     }
   };
-  
+
   // Handle template click - check auth first
   const handleTemplateClick = (template) => {
     if (!isUserLoggedIn()) {
@@ -124,9 +140,9 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
       setShowLoginModal(true);
       return;
     }
-   navigate(`/editor/${template._id}`);
+    navigate(`/editor/${template._id}`);
   };
-  
+
   // Handle view details click
   const handleViewDetails = (e, template) => {
     e.preventDefault();
@@ -134,7 +150,7 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
     setSelectedTemplate(template);
     setShowTemplateModal(true);
   };
-  
+
   // Handle template modal close
   const handleTemplateModalClose = () => {
     setShowTemplateModal(false);
@@ -150,7 +166,6 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
   // Handle successful login
   const handleLoginSuccess = () => {
     if (selectedTemplate) {
-      // window.location.href = `/editor/${selectedTemplate._id}`;
       navigate(`/editor/${selectedTemplate._id}`);
     }
   };
@@ -159,7 +174,7 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
   if ((loading && (!templates || templates.length === 0)) || isSearching) {
     return (
       <div className="template-grid template-grid-five">
-        <TemplateSkeleton count={40} />
+        <TemplateSkeleton count={15} />
       </div>
     );
   }
@@ -173,33 +188,38 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
   if (!loading && (!templates || templates.length === 0)) {
     return (
       <div className="no-results-message">
-        <span role="img" aria-label="searching" style={{fontSize: '2.5rem', display: 'block', marginBottom: '12px'}}>
+        <span
+          role="img"
+          aria-label="searching"
+          style={{ fontSize: '2.5rem', display: 'block', marginBottom: '12px' }}
+        >
           <Search size={24} />
         </span>
-        <div style={{fontWeight: 700, fontSize: '1.3rem', color: '#1976d2', marginBottom: '6px'}}>No matching results found</div>
-        <div style={{color: '#666', fontSize: '1rem'}}>Try a different category, subcategory, or search term!</div>
+        <div style={{ fontWeight: 700, fontSize: '1.3rem', color: '#1976d2', marginBottom: '6px' }}>
+          No matching results found
+        </div>
+        <div style={{ color: '#666', fontSize: '1rem' }}>
+          Try a different category, subcategory, or search term!
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="template-scroll-container" id="scrollableDiv" ref={scrollContainerRef}>
-        <InfiniteScroll
-          dataLength={templates.length}
-          next={handleLoadMore}
-          hasMore={hasMore}
-          loader={<BottomLoader />}
-          scrollThreshold={0.85}
-          className="template-grid template-grid-five"
-          onError={() => setHasError(true)}
-          refreshFunction={handleRefresh}
-          pullDownToRefresh={false}
-          scrollableTarget="scrollableDiv"
-          style={{ overflow: 'visible', width: '100%' }}
-        >
-          {templates && templates.map((tpl, index) => (
-            <div 
+      <InfiniteScroll
+        dataLength={templates.length}
+        next={handleLoadMore}
+        hasMore={hasMore}
+        loader={<Loader/>}
+        scrollThreshold="200px" // Trigger 200px from the bottom
+        scrollableTarget="scrollable-content" // Use the parent scrollable-content div
+        className="template-grid template-grid-five"
+       
+      >
+        {templates &&
+          templates.map((tpl, index) => (
+            <div
               className="template-card-wrapper"
               key={tpl._id}
               onClick={() => handleTemplateClick(tpl)}
@@ -211,7 +231,7 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
                   className="template-img"
                   loading="lazy"
                 />
-                <button 
+                <button
                   className="view-details-btn"
                   onClick={(e) => handleViewDetails(e, tpl)}
                 >
@@ -220,28 +240,18 @@ const TemplatesGrid = memo(({ templates, loading, hasMore, onLoadMore, isSearchi
               </div>
             </div>
           ))}
-        </InfiniteScroll>
-        
-        {/* Additional sentinel for scroll detection */}
-        {hasMore && !loading && (
-          <div 
-            className="scroll-detector" 
-            id="scroll-detector"
-            onMouseEnter={handleLoadMore}
-          ></div>
-        )}
-      </div>
-      
+      </InfiniteScroll>
+
       {/* Template Modal */}
       {showTemplateModal && (
-        <TemplateDetailsModal 
-          template={selectedTemplate} 
+        <TemplateDetailsModal
+          template={selectedTemplate}
           onClose={handleTemplateModalClose}
         />
       )}
 
       {/* Login Modal */}
-      <LoginModal 
+      <LoginModal
         isOpen={showLoginModal}
         onClose={handleLoginModalClose}
         onLoginSuccess={handleLoginSuccess}
