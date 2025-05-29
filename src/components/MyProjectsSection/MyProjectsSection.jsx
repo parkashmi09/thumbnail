@@ -46,7 +46,7 @@ export const MyProjectsSection = {
         await project.loadById(id);
         // Force save to regenerate preview
         setTimeout(() => {
-          project.forceSave();
+          project.requestSave();
         }, 1000);
         // Refresh projects list to show updated timestamp
         fetchProjects();
@@ -92,8 +92,6 @@ export const MyProjectsSection = {
       }
     };
 
-    console.log('projects', projects);
-
     // Filter valid projects (must have id and name)
     const validProjects = Array.isArray(projects)
       ? projects.filter(p => p && p.id && p.name)
@@ -124,12 +122,16 @@ export const MyProjectsSection = {
               <div className="loading-spinner"></div>
               <p>Loading projects...</p>
             </div>
-          ) : validProjects.length === 0 ? null : (
+          ) : validProjects.length === 0 ? (
+            <div style={{ paddingTop: '20px', textAlign: 'center', opacity: 0.6 }}>
+              You have no saved projects yet...
+            </div>
+          ) : (
             <div className="projects-grid">
               {validProjects.map((projectItem) => {
-                // Helper to check if preview is a valid URL
+                // Helper to check if preview is a valid base64 string
                 const isValidPreview = typeof projectItem.preview === 'string' &&
-                  (projectItem.preview.startsWith('blob:') || projectItem.preview.startsWith('http'));
+                  projectItem.preview.startsWith('data:image/');
                 return (
                   <div
                     key={projectItem.id}
@@ -142,8 +144,8 @@ export const MyProjectsSection = {
                         <img
                           src={projectItem.preview}
                           alt={projectItem.name}
-                          onError={e => {
-                            // Always show fallback, never append multiple
+                          onError={(e) => {
+                            // Show fallback if image fails to load
                             e.target.style.display = 'none';
                             const parent = e.target.parentElement;
                             let fallback = parent.querySelector('.fallback-preview');
@@ -156,8 +158,9 @@ export const MyProjectsSection = {
                               fallback.style.display = 'block';
                             }
                           }}
-                          onLoad={e => {
+                          onLoad={(e) => {
                             // Hide fallback if image loads
+                            e.target.style.display = 'block';
                             const parent = e.target.parentElement;
                             const fallback = parent.querySelector('.fallback-preview');
                             if (fallback) fallback.style.display = 'none';
@@ -172,7 +175,7 @@ export const MyProjectsSection = {
                       <div className="project-overlay">
                         <button
                           className="delete-btn"
-                          onClick={e => handleDeleteProject(e, projectItem.id)}
+                          onClick={(e) => handleDeleteProject(e, projectItem.id)}
                           title="Delete project"
                         >
                           <Trash2 size={14} />
@@ -204,4 +207,4 @@ export const MyProjectsSection = {
       </div>
     );
   }),
-}; 
+};

@@ -1,4 +1,3 @@
-// src/project.js
 import { makeAutoObservable } from 'mobx';
 import { createContext, useContext } from 'react';
 import { storage } from './storage';
@@ -12,6 +11,7 @@ class Project {
   name = 'Untitled Design';
   status = 'saved'; // 'saved', 'has-changes', 'saving', 'loading'
   designsLength = 0;
+  templateInfo = { name: 'Untitled Design', templateId: null };
 
   constructor({ store }) {
     makeAutoObservable(this);
@@ -21,6 +21,11 @@ class Project {
     store.on('change', () => {
       this.requestSave();
     });
+  }
+
+  setTemplateInfo({ name, templateId }) {
+    this.templateInfo = { name, templateId };
+    this.name = name;
   }
 
   async requestSave() {
@@ -38,7 +43,6 @@ class Project {
     try {
       const storeJSON = this.store.toJSON();
 
-      console.log('storeJSON', storeJSON);
       const maxWidth = 200;
       const canvas = this.store.pages.length
         ? await this.store._toCanvas({
@@ -52,6 +56,13 @@ class Project {
         canvas.toBlob(resolve, 'image/jpeg', 0.9);
       });
 
+      // Convert blob to base64 for persistent storage
+      const base64Preview = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+
       if (!this.id) {
         this.id = `project-${Date.now()}`; // Generate unique ID
       }
@@ -60,8 +71,9 @@ class Project {
         id: this.id,
         name: this.name,
         storeJSON,
-        preview: URL.createObjectURL(blob),
+        preview: base64Preview, // Store as base64 string
         timestamp: Date.now(),
+        templateInfo: this.templateInfo,
       };
 
       // Save project to localforage
@@ -88,6 +100,7 @@ class Project {
       if (projectData && projectData.storeJSON) {
         this.id = id;
         this.name = projectData.name;
+        this.templateInfo = projectData.templateInfo || { name: this.name, templateId: null };
         this.store.loadJSON(projectData.storeJSON);
         await storage.setItem('polotno-last-design-id', id);
         this.status = 'saved';
@@ -98,6 +111,7 @@ class Project {
       console.error('Error loading project:', e);
       this.id = '';
       this.name = 'Untitled Design';
+      this.templateInfo = { name: 'Untitled Design', templateId: null };
       await storage.removeItem('polotno-last-design-id');
       this.status = 'saved';
     }
@@ -118,7 +132,28 @@ class Project {
     this.store.addPage();
     this.id = '';
     this.name = 'Untitled Design';
+    this.templateInfo = { name: 'Untitled Design', templateId: null };
     await this.save();
+  }
+
+  async deleteProject(projectId) {
+    try {
+      await storage.removeItem(`project-${projectId}`);
+      const recentProjects = (await storage.getItem('recent-projects')) || [];
+      const updatedRecent = recentProjects.filter(id => id !== projectId);
+      await storage.setItem('recent-projects', updatedRecent);
+      if (this.id === projectId) {
+        this.id = '';
+        this.name = 'Untitled Design';
+        this.templateInfo = { name: 'Untitled Design', templateId: null };
+        this.store.clear();
+        this.store.addPage();
+        await storage.removeItem('polotno-last-design-id');
+      }
+    } catch (e) {
+      console.error('Error deleting project:', e);
+      throw e;
+    }
   }
 
   async getRecentProjects() {
