@@ -37,6 +37,8 @@ class Project {
     this.status = 'saving';
     try {
       const storeJSON = this.store.toJSON();
+
+      console.log('storeJSON', storeJSON);
       const maxWidth = 200;
       const canvas = this.store.pages.length
         ? await this.store._toCanvas({

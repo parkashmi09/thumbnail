@@ -21,7 +21,15 @@ export const MyProjectsSection = {
       setLoading(true);
       try {
         const recentProjects = await project.getRecentProjects();
-        setProjects(recentProjects);
+        // Deduplicate and filter valid projects
+        const seen = new Set();
+        const deduped = recentProjects.filter(p => {
+          if (!p || !p.id || !p.name) return false;
+          if (seen.has(p.id)) return false;
+          seen.add(p.id);
+          return true;
+        });
+        setProjects(deduped);
       } catch (error) {
         console.error('Error fetching projects:', error);
       } finally {
@@ -84,6 +92,13 @@ export const MyProjectsSection = {
       }
     };
 
+    console.log('projects', projects);
+
+    // Filter valid projects (must have id and name)
+    const validProjects = Array.isArray(projects)
+      ? projects.filter(p => p && p.id && p.name)
+      : [];
+
     return (
       <div className="my-projects-panel">
         <div className="my-projects-header">
@@ -109,68 +124,68 @@ export const MyProjectsSection = {
               <div className="loading-spinner"></div>
               <p>Loading projects...</p>
             </div>
-          ) : projects.length === 0 ? (
-            <div className="empty-state">
-              <FolderOpen size={48} />
-              <p>No recent projects found.</p>
-              <p>Create your first design to get started!</p>
-            </div>
-          ) : (
+          ) : validProjects.length === 0 ? null : (
             <div className="projects-grid">
-              {projects.map((projectItem) => (
-                <div
-                  key={projectItem.id}
-                  className={`project-card ${project.id === projectItem.id ? 'active' : ''}`}
-                  onClick={() => handleLoadProject(projectItem.id)}
-                  title={projectItem.name}
-                >
-                  <div className="project-preview">
-                    {projectItem.preview ? (
-                      <img
-                        src={projectItem.preview}
-                        alt={projectItem.name}
-                        onLoad={(e) => {
-                          // Hide any fallback if image loads successfully
-                          const parent = e.target.parentElement;
-                          const fallback = parent.querySelector('.fallback-preview');
-                          if (fallback) {
-                            fallback.style.display = 'none';
-                          }
-                        }}
-                        onError={(e) => {
-                          // Create a fallback preview
-                          e.target.style.display = 'none';
-                          const parent = e.target.parentElement;
-                          if (!parent.querySelector('.fallback-preview')) {
-                            const fallback = document.createElement('div');
-                            fallback.className = 'fallback-preview';
-                            fallback.innerHTML = `<span>📄</span><div class="fallback-text">${projectItem.name.substring(0, 8)}</div>`;
-                            parent.appendChild(fallback);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <div className="fallback-preview">
-                        <span>📄</span>
-                        <div className="fallback-text">{projectItem.name.substring(0, 8)}</div>
+              {validProjects.map((projectItem) => {
+                // Helper to check if preview is a valid URL
+                const isValidPreview = typeof projectItem.preview === 'string' &&
+                  (projectItem.preview.startsWith('blob:') || projectItem.preview.startsWith('http'));
+                return (
+                  <div
+                    key={projectItem.id}
+                    className={`project-card ${project.id === projectItem.id ? 'active' : ''}`}
+                    onClick={() => handleLoadProject(projectItem.id)}
+                    title={projectItem.name}
+                  >
+                    <div className="project-preview">
+                      {isValidPreview ? (
+                        <img
+                          src={projectItem.preview}
+                          alt={projectItem.name}
+                          onError={e => {
+                            // Always show fallback, never append multiple
+                            e.target.style.display = 'none';
+                            const parent = e.target.parentElement;
+                            let fallback = parent.querySelector('.fallback-preview');
+                            if (!fallback) {
+                              fallback = document.createElement('div');
+                              fallback.className = 'fallback-preview';
+                              fallback.innerHTML = `<span>📄</span><div class='fallback-text'>${projectItem.name.substring(0, 8)}</div>`;
+                              parent.appendChild(fallback);
+                            } else {
+                              fallback.style.display = 'block';
+                            }
+                          }}
+                          onLoad={e => {
+                            // Hide fallback if image loads
+                            const parent = e.target.parentElement;
+                            const fallback = parent.querySelector('.fallback-preview');
+                            if (fallback) fallback.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="fallback-preview">
+                          <span>📄</span>
+                          <div className="fallback-text">{projectItem.name.substring(0, 8)}</div>
+                        </div>
+                      )}
+                      <div className="project-overlay">
+                        <button
+                          className="delete-btn"
+                          onClick={e => handleDeleteProject(e, projectItem.id)}
+                          title="Delete project"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
-                    )}
-                    <div className="project-overlay">
-                      <button
-                        className="delete-btn"
-                        onClick={(e) => handleDeleteProject(e, projectItem.id)}
-                        title="Delete project"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                    </div>
+                    <div className="project-info">
+                      <p className="project-name">{projectItem.name}</p>
+                      <p className="project-date">{formatDate(projectItem.timestamp)}</p>
                     </div>
                   </div>
-                  <div className="project-info">
-                    <p className="project-name">{projectItem.name}</p>
-                    <p className="project-date">{formatDate(projectItem.timestamp)}</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

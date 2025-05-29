@@ -57,7 +57,7 @@ const pricingPlans = [
 ];
 
 const ExportDialog = ({ isOpen, onClose, store }) => {
-  const [fileName, setFileName] = useState(getDefaultFileName(store));
+  const [fileName, setFileName] = useState("");
   const [fileFormat, setFileFormat] = useState("Normal JPG");
   const [exportSize, setExportSize] = useState("1280 x 720 px");
   const [exportScale, setExportScale] = useState("1x");
@@ -67,12 +67,13 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
   const CREDITS_COST = 5;
 
   useEffect(() => {
-    // Reset states when dialog opens
+    // Reset states and set default file name when dialog opens
     if (isOpen) {
+      setFileName(getDefaultFileName(store));
       setShowConfirmation(false);
       setShowPlans(false);
     }
-  }, [isOpen]);
+  }, [isOpen, store]);
 
   const FileFormatMenu = (
     <Menu>
@@ -104,11 +105,26 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
 
   const handleExport = async () => {
     try {
-      // Consume credits first
+      // 1. Call the download-template API with userId from localStorage
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        toast.error('User not logged in. Please log in to download.');
+        return;
+      }
+      const apiRes = await fetch('https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/download-template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      if (!apiRes.ok) {
+        const errMsg = await apiRes.text();
+        toast.error(`Download failed: ${errMsg || apiRes.statusText}`);
+        return;
+      }
+      // 2. Consume credits
       consumeCredits(CREDITS_COST);
       toast.success(`${CREDITS_COST} credits used for download`);
-      
-      // Then export
+      // 3. Proceed to export
       await store.waitLoading();
       if (fileFormat === "PDF") {
         await store.saveAsPDF({
@@ -345,18 +361,25 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
 // Helper function to get default file name
 function getDefaultFileName(store) {
   const firstPage = store.pages[0];
+
+  // Check if the page has a custom property with a template name
+  if (firstPage?.custom?.templateName) {
+    return firstPage.custom.templateName.replace(/[^a-zA-Z0-9]/g, "_");
+  }
+
+  // Fallback: Look for a text element with meaningful content
   if (firstPage && firstPage.children.length > 0) {
     const textElements = firstPage.children.filter(
-      (child) => child.type === "text"
+      (child) => child.type === "text" && child.text && child.text.trim() !== ""
     );
     if (textElements.length > 0) {
-      return (
-        textElements[0].text.split("\n")[0].replace(/[^a-zA-Z0-9]/g, "_") ||
-        "design_export"
-      );
+      const firstText = textElements[0].text.split("\n")[0].trim();
+      return firstText.replace(/[^a-zA-Z0-9]/g, "_") || "template_design";
     }
   }
-  return "design_export";
+
+  // Fallback to a timestamp-based default name
+  return `template_${new Date().toISOString().split("T")[0].replace(/-/g, "_")}`;
 }
 
 export default ExportDialog;

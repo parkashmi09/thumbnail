@@ -251,7 +251,7 @@ const Home = () => {
         </div>
         
         {/* Scrollable content area */}
-        <div className="">
+        <div style={{height: '100vh', overflowY: 'auto'}} className="">
           <div className="home-wrapper">
             {/* Category Sidebar */}
             {selectedCategory && selectedCategoryObj && (

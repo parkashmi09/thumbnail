@@ -17,6 +17,8 @@ const loadCredits = (key, maxUsage) => {
     // Check if user is logged in
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
+    const thumbnailCredits = localStorage.getItem('thumbnail_credits');
+    console.log('thumbnail_credits', thumbnailCredits);
     
     // If user is not logged in, return 0 credits
     if (!token || !userId) {
