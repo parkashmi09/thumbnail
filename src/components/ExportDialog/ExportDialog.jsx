@@ -105,14 +105,27 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
 
   const handleExport = async () => {
     try {
-      // 1. Call the download-template API with userId from localStorage
+      // 1. Get userId from localStorage
       const userId = localStorage.getItem('userId');
       if (!userId) {
         toast.error('User not logged in. Please log in to download.');
         return;
       }
 
-      // 2. Check current credits
+      // 2. Call the download-template API first
+      const downloadResponse = await fetch('https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/download-template', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId })
+      });
+
+      if (!downloadResponse.ok) {
+        throw new Error('Download template API failed');
+      }
+
+      // 3. Check current credits after successful download template API call
       const response = await fetch(`https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/user/credit/${userId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch credits');
@@ -127,7 +140,7 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
       
       toast.success(`${CREDITS_COST} credits used for download`);
 
-      // 3. Proceed to export
+      // 4. Proceed to export
       await store.waitLoading();
       if (fileFormat === "PDF") {
         await store.saveAsPDF({
@@ -142,7 +155,7 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
         });
       }
       
-      // 4. Trigger credit refresh after successful download
+      // 5. Trigger credit refresh after successful download
       triggerCreditsUpdate();
       
       onClose();
