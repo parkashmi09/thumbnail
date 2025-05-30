@@ -111,19 +111,22 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
         toast.error('User not logged in. Please log in to download.');
         return;
       }
-      const apiRes = await fetch('https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/download-template', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId })
-      });
-      if (!apiRes.ok) {
-        const errMsg = await apiRes.text();
-        toast.error(`Download failed: ${errMsg || apiRes.statusText}`);
+
+      // 2. Check current credits
+      const response = await fetch(`https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/user/credit/${userId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch credits');
+      }
+      const data = await response.json();
+      const currentCredits = data.credit || 0;
+
+      if (currentCredits < CREDITS_COST) {
+        toast.error('Not enough credits available. Please upgrade to continue.');
         return;
       }
-      // 2. Consume credits
-      consumeCredits(CREDITS_COST);
+      
       toast.success(`${CREDITS_COST} credits used for download`);
+
       // 3. Proceed to export
       await store.waitLoading();
       if (fileFormat === "PDF") {
@@ -138,6 +141,10 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
           pixelRatio: parseInt(exportScale) || 1,
         });
       }
+      
+      // 4. Trigger credit refresh after successful download
+      triggerCreditsUpdate();
+      
       onClose();
     } catch (error) {
       console.error("Export failed:", error);

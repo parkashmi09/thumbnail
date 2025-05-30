@@ -9,73 +9,50 @@ export const triggerCreditsUpdate = () => {
   window.dispatchEvent(event);
 };
 
-// Prototype credit system
-// Uses localStorage to track user credits
-// Credits reset daily and when user logs in they get maxUsage credits
-const loadCredits = (key, maxUsage) => {
+// Function to fetch credits from API
+const fetchCredits = async () => {
   try {
-    // Check if user is logged in
-    const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
-    const thumbnailCredits = localStorage.getItem('thumbnail_credits');
-    console.log('thumbnail_credits', thumbnailCredits);
-    
-    // If user is not logged in, return 0 credits
-    if (!token || !userId) {
-      return 0;
+    if (!userId) return 0;
+
+    const response = await fetch(`https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/user/credit/${userId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch credits');
     }
-    
-    const data = JSON.parse(localStorage.getItem(key) || '{}');
-    // Reset credits if it's a new day
-    if (data.date !== new Date().toDateString()) {
-      return maxUsage;
-    }
-    return data.credits || maxUsage;
-  } catch (e) {
-    console.error('Error loading credits:', e);
+    const data = await response.json();
+    return data.credit || 0;
+  } catch (error) {
+    console.error('Error fetching credits:', error);
+    return 0;
   }
-  return maxUsage;
 };
 
-const saveCredits = (key, credits) => {
-  localStorage.setItem(
-    key,
-    JSON.stringify({
-      date: new Date().toDateString(),
-      credits,
-    })
-  );
-  // Trigger an update event when credits are saved
-  triggerCreditsUpdate();
-};
-
-export const useCredits = (key = 'thumbnail_credits', maxUsage = 20) => {
-  const [credits, setCredits] = useState(() =>
-    loadCredits(key, maxUsage)
-  );
+export const useCredits = () => {
+  const [credits, setCredits] = useState(0);
   
-  // Listen for token changes
+  // Fetch credits initially and when auth status changes
   useEffect(() => {
-    const checkAuthStatus = () => {
+    const checkCredits = async () => {
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
       
       if (token && userId) {
-        setCredits(loadCredits(key, maxUsage));
+        const userCredits = await fetchCredits();
+        setCredits(userCredits);
       } else {
         setCredits(0);
       }
     };
     
     // Set up an interval to check credits periodically (every 3 seconds)
-    const intervalId = setInterval(checkAuthStatus, 3000);
+    const intervalId = setInterval(checkCredits, 3000);
     
     // Initial check
-    checkAuthStatus();
+    checkCredits();
     
     // Listen for credit update events
     const handleCreditsUpdate = () => {
-      setCredits(loadCredits(key, maxUsage));
+      checkCredits();
     };
     
     window.addEventListener(CREDITS_UPDATED_EVENT, handleCreditsUpdate);
@@ -85,34 +62,10 @@ export const useCredits = (key = 'thumbnail_credits', maxUsage = 20) => {
       clearInterval(intervalId);
       window.removeEventListener(CREDITS_UPDATED_EVENT, handleCreditsUpdate);
     };
-  }, [key, maxUsage]);
-  
-  // Save credits whenever they change
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-    
-    if (token && userId) {
-      saveCredits(key, credits);
-    }
-  }, [key, credits]);
-
-  const consumeCredits = (amount = 1) => {
-    setCredits((currentCredits) => {
-      const newCredits = Math.max(0, currentCredits - amount);
-      return newCredits;
-    });
-    return credits > 0;
-  };
-  
-  const resetCredits = () => {
-    setCredits(maxUsage);
-  };
+  }, []);
 
   return { 
-    credits, 
-    consumeCredits,
-    resetCredits,
+    credits,
     hasCredits: credits > 0 
   };
 };

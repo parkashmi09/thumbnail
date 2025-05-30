@@ -16,7 +16,7 @@ export const useCreditsContext = () => {
 // Provider component
 export const CreditsProvider = ({ children }) => {
   // Use our credits hook
-  const { credits, consumeCredits, resetCredits, hasCredits } = useCredits('thumbnail_credits', 20);
+  const { credits, hasCredits } = useCredits();
   
   // Add a forceUpdate state to trigger re-renders when needed
   const [forceUpdate, setForceUpdate] = useState(0);
@@ -34,19 +34,9 @@ export const CreditsProvider = ({ children }) => {
     };
   }, []);
   
-  // Enhanced consumeCredits that triggers updates
-  const enhancedConsumeCredits = (amount) => {
-    const result = consumeCredits(amount);
-    // Force a context update after consumption
-    setForceUpdate(prev => prev + 1);
-    return result;
-  };
-  
-  // Provide the credits and functions to consume/reset them to the entire app
+  // Provide the credits to the entire app
   const value = {
     credits,
-    consumeCredits: enhancedConsumeCredits,
-    resetCredits,
     hasCredits,
     forceUpdate // Include this in the context value to trigger re-renders
   };
