@@ -160,8 +160,8 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
       
       onClose();
     } catch (error) {
-      console.error("Export failed:", error);
-      toast.error("Export failed. Please try again.");
+      // console.error("Export failed:", error);
+      // toast.error("Export failed. Please try again.");
     }
   };
 
