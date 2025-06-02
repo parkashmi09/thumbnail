@@ -6,7 +6,6 @@ import { X, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import './AuthModals.css';
 import Logo from '../../assets/images/LOGO.png';
-import googleIcon from '../../assets/images/ggogle.png';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import LoginSuccessModal from './LoginSuccessModal';
@@ -18,7 +17,6 @@ const SIGN_UP_URL = `${API_BASE_URL}/user/signUp`;
 const GET_USER_URL = `${API_BASE_URL}/user/getBy-id`;
 const MOBILE_LOGIN_URL = `${API_BASE_URL}/user/login-with-mobile`;
 const VERIFY_OTP_URL = `${API_BASE_URL}/user/verify-otp`;
-const GOOGLE_AUTH_URL = `${API_BASE_URL}/google`;
 
 // Credit system constants
 const CREDITS_KEY = 'thumbnail_credits';
@@ -150,31 +148,6 @@ const OtpInputField = memo(({ value, onChange, hasError }) => {
   );
 });
 
-// Common Google sign-in handler
-const handleGoogleSignIn = () => {
-  window.location.href = GOOGLE_AUTH_URL;
-};
-
-// Common data fetching functions
-const fetchUserData = async (userId) => {
-  try {
-    const response = await axios.get(`${GET_USER_URL}/${userId}`);
-    const userData = response.data.user;
-
-    // Store user data in localStorage
-    localStorage.setItem('userName', userData.userName);
-    if (userData.email) localStorage.setItem('userEmail', userData.email);
-
-    // Reset credits when user data is fetched
-    resetUserCredits();
-
-    return userData;
-  } catch (error) {
-    console.error('Error fetching user data:', error);
-    return null;
-  }
-};
-
 // Reusable Modal wrapper component
 const ModalWrapper = memo(({ isOpen, onClose, children }) => (
   <Transition appear show={isOpen} as={Fragment}>
@@ -218,31 +191,6 @@ const LogoHeader = memo(() => (
   >
     <img src={Logo} alt="Logo" className="modal-logo" />
   </motion.div>
-));
-
-// Reusable Google button component
-const GoogleButton = memo(({ delay = 0.42 }) => (
-  <>
-    <motion.div
-      className="divider"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: delay - 0.04 }}
-    >
-      <span>OR</span>
-    </motion.div>
-    <motion.button
-      type="button"
-      className="google-button"
-      onClick={handleGoogleSignIn}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.3 }}
-    >
-      <img src={googleIcon} alt="Google" />
-      Continue with Google
-    </motion.button>
-  </>
 ));
 
 // OTP login form component
@@ -325,7 +273,6 @@ const OtpLoginForm = memo(
           >
             {isLoading ? 'Processing...' : showOtp ? 'Verify OTP' : 'Continue'}
           </motion.button>
-          <GoogleButton />
         </Form>
       )}
     </Formik>
@@ -407,7 +354,6 @@ const RegistrationForm = memo(({ handleSubmit, isLoading, prefillMobile }) => (
         >
           {isLoading ? 'Registering...' : 'Register'}
         </motion.button>
-        <GoogleButton delay={0.58} />
       </Form>
     )}
   </Formik>
