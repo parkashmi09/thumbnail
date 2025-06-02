@@ -40,7 +40,7 @@ export const TemplatesPanel = observer(({ store, routingData }) => {
 
       setIsLoading(true);
       try {
-        let url = 'https://thumnail-maker.onrender.com/api/v1/get/templates';
+        let url = 'https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/get/templates';
         
         // Use selected subcategory ID if available, otherwise use the first from routingData
         if (selectedSubCategoryId) {

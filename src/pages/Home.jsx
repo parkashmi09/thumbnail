@@ -36,7 +36,7 @@ const Home = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch('https://thumnail-maker.onrender.com/api/v1/get/categories');
+        const res = await fetch('https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/get/categories');
         const data = await res.json();
         setRawCategories(data);
         setCategories(
@@ -62,7 +62,7 @@ const Home = () => {
         if (searchTerm) setSearching(true);
       }
 
-      let url = `https://thumnail-maker.onrender.com/api/v1/get/templates?page=${pageNum}&limit=${LIMIT}&category=${categoryId}`;
+      let url = `https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/get/templates?page=${pageNum}&limit=${LIMIT}&category=${categoryId}`;
 
       // Add search term if provided
       if (searchTerm) {

@@ -128,7 +128,7 @@ const SearchBar = ({ onSearch }) => {
       
       setIsLoading(true);
       try {
-        const response = await fetch(`https://thumnail-maker.onrender.com/api/v1/template-suggestions?query=${encodeURIComponent(term)}`);
+        const response = await fetch(`https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/template-suggestions?query=${encodeURIComponent(term)}`);
         const data = await response.json();
         setSuggestions(data);
         setShowSuggestions(true);

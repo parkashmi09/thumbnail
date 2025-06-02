@@ -285,7 +285,7 @@ const Editor = () => {
         }
         // Case 3: Load template if templateId is provided
         else if (templateId && templateId !== 'new') {
-          let url = `https://thumnail-maker.onrender.com/api/v1/templates/${templateId}`;
+          let url = `https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/templates/${templateId}`;
           if (routingData) {
             const queryParams = new URLSearchParams();
             if (

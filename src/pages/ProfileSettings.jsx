@@ -37,7 +37,7 @@ const ProfileSettings = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://thumnail-maker.onrender.com/api/v1/user/getBy-id/${userId}`,
+          `https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/user/getBy-id/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -161,7 +161,7 @@ const ProfileSettings = () => {
       }
       
       const response = await axios.put(
-        `https://thumnail-maker.onrender.com/api/v1/user/update/${userId}`,
+        `https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/user/update/${userId}`,
         formDataToSend,
         {
           headers: {
