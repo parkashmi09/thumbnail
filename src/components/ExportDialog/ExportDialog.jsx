@@ -63,6 +63,7 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
   const [exportScale, setExportScale] = useState("1x");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showPlans, setShowPlans] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { credits, consumeCredits, hasCredits } = useCreditsContext();
   const CREDITS_COST = 5;
 
@@ -72,6 +73,7 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
       setFileName(getDefaultFileName(store));
       setShowConfirmation(false);
       setShowPlans(false);
+      setIsDownloading(false); // Reset download state
     }
   }, [isOpen, store]);
 
@@ -104,6 +106,9 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
   };
 
   const handleExport = async () => {
+    if (isDownloading) return; // Prevent duplicate downloads
+
+    setIsDownloading(true); // Start loading state
     try {
       // 1. Get userId from localStorage
       const userId = localStorage.getItem('userId');
@@ -160,8 +165,10 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
       
       onClose();
     } catch (error) {
-      // console.error("Export failed:", error);
-      // toast.error("Export failed. Please try again.");
+      console.error("Export failed:", error);
+      toast.error("Export failed. Please try again.");
+    } finally {
+      setIsDownloading(false); // End loading state
     }
   };
 
@@ -245,7 +252,7 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
             </div>
             <div className="credits-text">
               <p>Available Credits: <span className="credit-count">{credits}</span></p>
-              <p>Cost to Download: <span className="credit-cost">{CREDITS_COST} credits</span></p>
+              <p>Cost to Download: <span className="credit-cost">{CREDITS_COST}</span></p>
             </div>
           </div>
 
@@ -255,7 +262,7 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
               <InputGroup
                 value={fileName}
                 onChange={(e) => setFileName(e.target.value)}
-                placeholder="Enter file name"
+                placeholder=""
               />
             </div>
 
@@ -322,57 +329,74 @@ const ExportDialog = ({ isOpen, onClose, store }) => {
       <div className="confirmation-content">
         <div className="confirmation-illustration">
           <svg width="150" height="150" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path 
-              d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z"
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12 2 17.52 6.48 22 12 22C17.52 22 2 12C22 6.48 2 2"
               fill="#e6f7f1"
               stroke="#00a67e"
               strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              strokeCap="round"
+              strokeLineJoin="round"
             />
-            <path 
+            <path
               d="M12 16V8M8 12H16"
               stroke="#00a67e"
               strokeWidth="1.5"
-              strokeLinecap="round"
+              strokeLineCap="round"
               strokeLinejoin="round"
             />
-            <path 
-              d="M7 19L5 17M17 19L19 17M12 22V20M2 12H4M20 12H22M5 7L7 5M19 7L17 5"
+            <path
+              d="M7 19L5 17M17 19L19 17M12 22V20M2 12H4M20 12H12H22M2 2M5 7L7 5M19 7L17 5"
               stroke="#00a67e"
               strokeWidth="1.5"
+              opacity="0.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              opacity="0.5"
             />
           </svg>
-          
+
           <div className="credits-badge">
             <Coins size={16} className="coins-icon" />
             <span>{CREDITS_COST}</span>
           </div>
         </div>
-        
-        <h2>Confirm Download</h2>
-        
-        <p className="confirmation-message">
-          You're about to use <strong>{CREDITS_COST} credits</strong> to download this template.
-          You currently have <strong>{credits} credits</strong> available.
-        </p>
-        
-        <p className="file-info">
-          File will be downloaded as: <strong>{fileName}.{fileFormat === "Normal JPG" ? "jpg" : fileFormat === "Normal PNG" ? "png" : "pdf"}</strong>
-        </p>
-        
-        <div className="confirmation-actions">
-          <button className="back-button" onClick={() => setShowConfirmation(false)}>
-            Go Back
-          </button>
-          <button className="download-button" onClick={handleExport}>
-            <Download size={18} />
-            Download Now
-          </button>
-        </div>
+
+        {isDownloading ? (
+          <div className="loader-container">
+            <div className="loader"></div>
+            <p className="downloading-message">Downloading your template...</p>
+          </div>
+        ) : (
+          <>
+            <h2>Confirm Download</h2>
+            
+            <p className="confirmation-message">
+              You're about to use <strong>{CREDITS_COST} credits</strong> to download this template.
+              You currently have <strong>{credits} credits</strong> available.
+            </p>
+            
+            <p className="file-info">
+              File will be downloaded as: <strong>{fileName}.{fileFormat === "Normal JPG" ? "jpg" : fileFormat === "Normal PNG" ? "png" : "pdf"}</strong>
+            </p>
+            
+            <div className="confirmation-actions">
+              <button 
+                className="back-button" 
+                onClick={() => setShowConfirmation(false)}
+                disabled={isDownloading}
+              >
+                Go Back
+              </button>
+              <button 
+                className="download-button" 
+                onClick={handleExport}
+                disabled={isDownloading}
+              >
+                <Download size={18} />
+                Download Now
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </Dialog>
   );
