@@ -20,6 +20,7 @@ import { useCreditsContext } from '../context/CreditsContext';
 import toast from 'react-hot-toast';
 import { IconsSection } from '../components/IconSection';
 import ExportDialog from '../components/ExportDialog/ExportDialog';
+import { UploadSection } from '../components/UploadSection/UploadSection';
 
 // Create store instance function
 const createEditorStore = () => {
@@ -597,6 +598,7 @@ const Editor = () => {
       templateId,
       Panel: (props) => <TemplatesSection.Panel {...props} routingData={routingData} />,
     },
+    {...UploadSection},
     IconsSection,
     CustomElements,
     ...remainingDefaultSections,
