@@ -1,22 +1,26 @@
-import React, { useState } from 'react';
-import { Tabs, Tab } from '@blueprintjs/core';
+import React, { useState, useEffect, useRef } from 'react';
 import { SectionTab } from 'polotno/side-panel';
-import { Shapes } from 'lucide-react'; // Import Shapes icon from React Lucide
+import { Shapes } from 'lucide-react';
+import { Spinner, Button } from '@blueprintjs/core';
 
-// SVG data URLs for shapes
-const SHAPES = {
-  basic: {
-    circle: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="%239ACD32"/></svg>`,
-    triangle: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%238A2BE2" d="M12 2L2 22h20L12 2z"/></svg>`,
-    star: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23FFD700" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`,
-  },
-  decorative: {
-    heart: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23FF6347" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`,
-    spiral: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path stroke="%234682B4" stroke-width="2" fill="none" d="M50 50 C55 50, 60 55, 60 60 C60 65, 55 70, 50 70 C45 70, 40 65, 40 60 C40 55, 45 50, 50 50 C60 50, 70 60, 70 70 C70 80, 60 90, 50 90 C40 90, 30 80, 30 70 C30 60, 40 50, 50 50"/></svg>`,
-    arrow: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23FF4500" d="M5 13H16.17L11.29 17.88L12.71 19.29L19.71 12.29L12.71 5.29L11.29 6.71L16.17 11.59H5V13Z"/></svg>`,
-    moon: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23C0C0C0" d="M12 3a9 9 0 0 0 9 9 9 9 0 0 0-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9m0-2a11 11 0 0 0-11 11 11 11 0 0 0 11 11 11 11 0 0 0 11-11 11 11 0 0 0-11-11z"/></svg>`,
-    flower: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23FF69B4" d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6c0-1.1-.9-2-2-2h-2v-2h2c1.1 0 2-.9 2-2s-.9-2-2-2h-2V6h2c1.1 0 2-.9 2-2s-.9-2-2-2h-2c-1.1 0-2 .9-2 2v2H8V4c0-1.1-.9-2-2-2s-2 .9-2 2v2H4c-1.1 0-2 .9-2 2s.9 2 2 2h2v2H4c-1.1 0-2 .9-2 2s.9 2 2 2h2v2H4c-1.1 0-2 .9-2 2s.9 2 2 2h2v2c0 1.1.9 2 2 2s2-.9 2-2v-2h4v2c0 1.1.9 2 2 2z"/></svg>`,
-  },
+const CATEGORIES = [
+  'Basic',
+  'Arrows',
+  'Symbols',
+  'Decorations',
+  'Flowchart',
+  'Callouts',
+];
+
+const PAGE_SIZE = 20; // Adjust as needed
+
+const fetchShapes = async (category, page) => {
+  const url = category
+    ? `https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/admin/shapes?category=${category}&page=${page}&limit=${PAGE_SIZE}`
+    : `https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/admin/shapes?page=${page}&limit=${PAGE_SIZE}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Failed to fetch shapes');
+  return res.json();
 };
 
 const ShapeButton = ({ src, alt, onClick }) => (
@@ -29,42 +33,128 @@ const ShapeButton = ({ src, alt, onClick }) => (
       alignItems: 'center',
       justifyContent: 'center',
       cursor: 'pointer',
+      border: '1px solid #eee',
+      borderRadius: 8,
+      background: '#fafbfc',
+      transition: 'box-shadow 0.2s',
+      boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+      margin: 'auto',
     }}
   >
     <img
       src={src}
       alt={alt}
       style={{
-        width: '100%',
-        height: '100%',
+        width: '90%',
+        height: '90%',
         objectFit: 'contain',
+        pointerEvents: 'none',
       }}
     />
   </div>
 );
 
-const ShapeGrid = ({ shapes, onAddShape }) => (
-  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginTop: '10px' }}>
-    {Object.entries(shapes).map(([name, svg]) => (
-      <ShapeButton
-        key={name}
-        src={svg}
-        alt={name}
-        onClick={() => onAddShape(svg)}
-      />
-    ))}
-  </div>
-);
+const ShapeGrid = ({ shapes, onAddShape, onScroll, loading, hasMore }) => {
+  const gridRef = useRef();
+
+  // Infinite scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!gridRef.current || !hasMore || loading) return;
+      const { scrollTop, scrollHeight, clientHeight } = gridRef.current;
+      if (scrollHeight - scrollTop - clientHeight < 100) {
+        onScroll();
+      }
+    };
+    const grid = gridRef.current;
+    if (grid) grid.addEventListener('scroll', handleScroll);
+    return () => {
+      if (grid) grid.removeEventListener('scroll', handleScroll);
+    };
+  }, [onScroll, hasMore, loading]);
+
+  return (
+    <div
+      ref={gridRef}
+      style={{
+        height: 400,
+        overflowY: 'auto',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
+        gap: 16,
+        padding: 8,
+        background: '#fff',
+        borderRadius: 8,
+        border: '1px solid #eee',
+        marginTop: 16,
+        position: 'relative',
+      }}
+    >
+      {Object.entries(shapes).map(([name, svg]) => (
+        <ShapeButton
+          key={name}
+          src={svg}
+          alt={name}
+          onClick={() => onAddShape(svg)}
+        />
+      ))}
+      {loading && (
+        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 16 }}>
+          <Spinner size={24} />
+        </div>
+      )}
+    </div>
+  );
+};
 
 const CustomElements = {
   name: 'custom-elements',
   Tab: (props) => (
     <SectionTab name="Elements" {...props}>
-      <Shapes size={20} /> {/* Using React Lucide Shapes icon */}
+      <Shapes size={20} />
     </SectionTab>
   ),
   Panel: ({ store }) => {
-    const [selectedTab, setSelectedTab] = useState('basic-shapes');
+    const [category, setCategory] = useState('Basic');
+    const [shapes, setShapes] = useState({});
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    // Fetch shapes on category or page change
+    useEffect(() => {
+      let ignore = false;
+      const loadShapes = async () => {
+        setLoading(true);
+        setError('');
+        try {
+          const data = await fetchShapes(category, page);
+          // The API returns { category: { name: svg, ... }, ... }
+          const catKey = category.toLowerCase();
+          const newShapes = data[catKey] || {};
+          setShapes((prev) =>
+            page === 1 ? newShapes : { ...prev, ...newShapes }
+          );
+          setHasMore(Object.keys(newShapes).length === PAGE_SIZE);
+        } catch (err) {
+          setError('Failed to load shapes');
+        } finally {
+          if (!ignore) setLoading(false);
+        }
+      };
+      loadShapes();
+      return () => {
+        ignore = true;
+      };
+    }, [category, page]);
+
+    // Reset page and shapes when category changes
+    useEffect(() => {
+      setPage(1);
+      setShapes({});
+      setHasMore(true);
+    }, [category]);
 
     const addShape = (shapeSvg) => {
       const page = store.activePage || store.addPage();
@@ -82,26 +172,47 @@ const CustomElements = {
       }
     };
 
+    const handleScroll = () => {
+      if (!loading && hasMore) {
+        setPage((p) => p + 1);
+      }
+    };
+
     return (
-      <div style={{ padding: '10px', height: '100%', overflowY: 'auto' }}>
-        <h3>Custom Elements</h3>
-        <Tabs
-          id="element-tabs"
-          selectedTabId={selectedTab}
-          onChange={(newTabId) => setSelectedTab(newTabId)}
-          renderActiveTabPanelOnly
-        >
-          <Tab
-            id="basic-shapes"
-            title="Basic Shapes"
-            panel={<ShapeGrid shapes={SHAPES.basic} onAddShape={addShape} />}
-          />
-          <Tab
-            id="decorative"
-            title="Decorative"
-            panel={<ShapeGrid shapes={SHAPES.decorative} onAddShape={addShape} />}
-          />
-        </Tabs>
+      <div style={{ padding: 16, height: '100%', background: '#f7f8fa' }}>
+        <h3 style={{ margin: '0 0 12px 0' }}>Custom Elements</h3>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {CATEGORIES.map((cat) => (
+            <Button
+              key={cat}
+              active={category === cat}
+              onClick={() => setCategory(cat)}
+              style={{
+                borderRadius: 20,
+                fontWeight: 500,
+                background: category === cat ? '#00a67e' : '#fff',
+                color: category === cat ? '#fff' : '#333',
+                border: '1px solid #00a67e',
+                boxShadow: category === cat ? '0 2px 8px #00a67e22' : 'none',
+                padding: '4px 16px',
+              }}
+            >
+              {cat}
+            </Button>
+          ))}
+        </div>
+        {error && (
+          <div style={{ color: 'red', margin: '16px 0', textAlign: 'center' }}>
+            {error}
+          </div>
+        )}
+        <ShapeGrid
+          shapes={shapes}
+          onAddShape={addShape}
+          onScroll={handleScroll}
+          loading={loading}
+          hasMore={hasMore}
+        />
       </div>
     );
   },
