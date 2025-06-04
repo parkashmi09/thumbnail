@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Section, SectionTab } from 'polotno/side-panel';
+import { SectionTab } from 'polotno/side-panel';
 import { Upload } from 'lucide-react';
 import { ProgressBar, Intent } from '@blueprintjs/core';
 import toast from 'react-hot-toast';
@@ -222,7 +222,7 @@ const UploadPanel = observer(({ store }) => {
 });
 
 // Create upload section
-export const UploadSection = {
+const UploadSection = {
   name: 'upload',
   Tab: (props) => (
     <SectionTab name="Upload" {...props}>
@@ -230,4 +230,6 @@ export const UploadSection = {
     </SectionTab>
   ),
   Panel: UploadPanel,
-}; 
+};
+
+export default UploadSection; 

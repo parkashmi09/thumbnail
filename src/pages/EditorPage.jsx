@@ -20,7 +20,7 @@ import { useCreditsContext } from '../context/CreditsContext';
 import toast from 'react-hot-toast';
 import { IconsSection } from '../components/IconSection';
 import ExportDialog from '../components/ExportDialog/ExportDialog';
-import { UploadSection } from '../components/UploadSection/UploadSection';
+import UploadSection from '../components/UploadSection/UploadSection';
 
 // Create store instance function
 const createEditorStore = () => {
@@ -585,12 +585,12 @@ const Editor = () => {
     return section;
   });
 
-  // Filter out 'templates' and 'elements' from the modified sections
+  // Filter out 'templates', 'elements', and 'upload' from the modified sections
   const remainingDefaultSections = modifiedSections.filter(
-    (section) => section.name !== 'templates' && section.name !== 'elements'
+    (section) => section.name !== 'templates' && section.name !== 'elements' && section.name !== 'upload'
   );
 
-  // Arrange sections in the desired order: My Projects, Related Templates, Icons, Elements, then remaining default sections
+  // Arrange sections in the desired order
   const sections = [
     MyProjectsSection,
     {
@@ -598,7 +598,7 @@ const Editor = () => {
       templateId,
       Panel: (props) => <TemplatesSection.Panel {...props} routingData={routingData} />,
     },
-    {...UploadSection},
+    UploadSection,
     IconsSection,
     CustomElements,
     ...remainingDefaultSections,
