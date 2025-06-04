@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { SectionTab } from 'polotno/side-panel';
-import { Upload } from 'lucide-react';
+import { Upload, Trash2 } from 'lucide-react';
 import { ProgressBar, Intent } from '@blueprintjs/core';
 import toast from 'react-hot-toast';
 import axios from 'axios';
@@ -11,6 +11,7 @@ const UploadPanel = observer(({ store }) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [userImages, setUserImages] = useState([]);
+  const [hoveredImageId, setHoveredImageId] = useState(null);
 
   // Get userId from localStorage
   const userId = localStorage.getItem('userId');
@@ -182,38 +183,96 @@ const UploadPanel = observer(({ store }) => {
       {/* Uploaded Images Grid */}
       <div style={{ 
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
-        gap: '10px',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+        gap: '15px',
         overflowY: 'auto',
-        flex: 1
+        flex: 1,
+        padding: '10px'
       }}>
         {userImages.map((image, index) => (
           <div
             key={index}
-            onClick={() => {
-              store.activePage?.addElement({
-                type: 'image',
-                src: image.url,
-              });
-            }}
+            onMouseEnter={() => setHoveredImageId(image._id)}
+            onMouseLeave={() => setHoveredImageId(null)}
             style={{
               cursor: 'pointer',
               position: 'relative',
-              aspectRatio: '1',
-              borderRadius: '4px',
+              width: '100%',
+              paddingBottom: '100%',
+              borderRadius: '8px',
               overflow: 'hidden',
-              border: '1px solid #eee'
+              border: '1px solid #eee',
+              backgroundColor: '#f5f5f5',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              transition: 'all 0.3s ease'
             }}
           >
-            <img
-              src={image.url}
-              alt={`Uploaded ${index + 1}`}
+            {/* Delete Button */}
+            <div
               style={{
+                position: 'absolute',
+                top: '8px',
+                right: '8px',
+                padding: '8px',
+                background: 'rgba(0,0,0,0.6)',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                opacity: hoveredImageId === image._id ? 1 : 0,
+                transition: 'all 0.3s ease',
+                zIndex: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px'
+              }}
+              onClick={async (e) => {
+                e.stopPropagation(); // Prevent image selection when clicking delete
+                try {
+                  await axios.delete(`https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/delete-uploads/${image._id}`);
+                  toast.success('Image deleted successfully');
+                  fetchUserImages(); // Refresh the images list
+                } catch (error) {
+                  console.error('Delete error:', error);
+                  toast.error('Failed to delete image');
+                }
+              }}
+            >
+              <Trash2 size={16} color="#fff" />
+            </div>
+
+            {/* Image Container */}
+            <div
+              onClick={() => {
+                store.activePage?.addElement({
+                  type: 'image',
+                  src: image.url,
+                });
+              }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
+                padding: '8px',
+                backgroundColor: '#fff'
               }}
-            />
+            >
+              <img
+                src={image.url}
+                alt={`Uploaded ${index + 1}`}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain'
+                }}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://via.placeholder.com/150?text=Error';
+                }}
+              />
+            </div>
           </div>
         ))}
       </div>
