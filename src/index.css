@@ -121,3 +121,10 @@ body {
 .nounContainer img {
   filter: invert(1);
 }
+
+.icon-section-noun-container {
+  height: 100%;
+  max-height: 400px; /* or whatever fits your layout */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
