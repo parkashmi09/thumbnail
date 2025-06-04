@@ -13,14 +13,13 @@ import { AuthProvider } from '../context/AuthContext';
 import { TemplatesSection } from '../TemplateSection';
 import Header from '../components/Header/Header';
 import CustomElements from '../components/CustomElements/CustomElements';
-import ActionControls from '../components/ActionControls';
 import Loader from '../components/Loader';
 import { MyProjectsSection } from '../components/MyProjectsSection/MyProjectsSection';
 import { ProjectContext, createProject, useProject } from '../utils/project';
 import { useCreditsContext } from '../context/CreditsContext';
 import toast from 'react-hot-toast';
 import { IconsSection } from '../components/IconSection';
-
+import ExportDialog from '../components/ExportDialog/ExportDialog';
 
 // Create store instance function
 const createEditorStore = () => {
@@ -67,34 +66,287 @@ const resizeImage = (blob, maxPixels = 250000) => {
   });
 };
 
+// Custom Layers Panel with Image Previews
+const CustomLayersPanel = observer(({ store }) => {
+  const activePage = store.activePage;
+
+  console.log('activePage', activePage);
+
+  if (!activePage) return <div>No active page</div>;
+
+  const handleSelectElement = (element) => {
+    store.selectElements([element.id]);
+  };
+
+  const handleToggleVisibility = (element) => {
+
+    element.set({ visible: !element.visible });
+  };
+
+  const handleToggleLock = (element) => {
+    element.set({ draggable: !element.draggable });
+    // console.log('element before toggle****', element);
+
+    // element.set({
+    //   locked: !element.locked,
+    //   draggable: !element.locked,
+    //   resizable: !element.locked,
+    // });
+   
+  };
+
+  const handleDelete = (elementId) => {
+    store.deleteElements([elementId]);
+  };
+
+  return (
+    <div style={{ padding: '10px', height: '100%', overflowY: 'auto' }}>
+      {activePage.children.slice().reverse().map((element) => (
+        <div
+          key={element.id}
+          onClick={() => handleSelectElement(element)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '5px',
+            borderBottom: '1px solid #ddd',
+            background: store.selectedElements.includes(element) ? '#e6f0fa' : 'transparent',
+            cursor: 'pointer',
+          }}
+        >
+          {/* Image Preview for Image Elements */}
+          {element.type === 'image' && element.src && (
+            <img
+              src={element.src}
+              alt="Preview"
+              style={{
+                width: '30px',
+                height: '30px',
+                objectFit: 'cover',
+                marginRight: '10px',
+                borderRadius: '3px',
+              }}
+              onError={(e) => {
+                e.target.src = 'https://via.placeholder.com/30?text=Error'; // Fallback image
+              }}
+            />
+          )}
+          {/* Placeholder for Non-Image Elements */}
+          {element.type !== 'image' && (
+            <div
+              style={{
+                width: '30px',
+                height: '30px',
+                marginRight: '10px',
+                borderRadius: '3px',
+                background: '#f0f0f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '12px',
+                color: '#888',
+              }}
+            >
+              {element.type.toUpperCase().charAt(0)}
+            </div>
+          )}
+          {/* Element Type and Name */}
+          <div style={{ flex: 1 }}>
+            <span style={{ fontWeight: 'bold' }}>{element.type.toUpperCase()}</span>
+            <span style={{ marginLeft: '5px' }}>{element.name || element.id}</span>
+          </div>
+          {/* Visibility Toggle */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleVisibility(element);
+            }}
+            style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer' }}
+            title={element.visible ? 'Hide' : 'Show'}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ color: element.visible ? '#000' : '#888' }}
+            >
+              {element.visible ? (
+                <>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </>
+              ) : (
+                <>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <path d="M3 3l18 18" />
+                </>
+              )}
+            </svg>
+          </button>
+          {/* Lock Toggle */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleLock(element);
+            }}
+            style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer' }}
+            title={element.locked ? 'Unlock' : 'Lock'}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ color: element.locked ? '#000' : '#888' }}
+            >
+              {!element.draggable ? (
+                <>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </>
+              ) : (
+                <>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+                </>
+              )}
+            </svg>
+          </button>
+          {/* Delete Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(element.id);
+            }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+            title="Delete"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ color: '#ff4d4f' }}
+            >
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <line x1="10" y1="11" x2="10" y2="17" />
+              <line x1="14" y1="11" x2="14" y2="17" />
+            </svg>
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+});
+
+// Custom Layers Section
+const CustomLayersSection = {
+  name: 'layers',
+  Tab: () => null, // Keep the tab hidden as per your current setup
+  Panel: CustomLayersPanel,
+};
+
+// ActionControls component
+const ActionControls = React.memo(({ store, onDownloadClick }) => {
+  console.log('ActionControls rendering');
+  const handleOpenLayers = () => {
+    console.log('Opening Layers panel');
+    store.openSidePanel('layers');
+  };
+
+  return (
+    <div style={{ display: 'flex', gap: '10px' }}>
+      <button
+        onClick={handleOpenLayers}
+        style={{
+          padding: '8px 15px',
+          borderRadius: '5px',
+          background: '#f0f0f0',
+          color: '#000',
+          cursor: 'pointer',
+          minWidth: '100px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '5px',
+          border: 'none',
+          fontSize: '16px',
+          fontWeight: '500',
+          transition: 'all 0.2s ease',
+          zIndex: 1001,
+        }}
+      >
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ color: '#000' }}
+        >
+          <path d="M12 2L2 7l10 5 10-5-10-5z" />
+          <path d="M2 17l10 5 10-5" />
+          <path d="M2 12l10 5"></path>
+        </svg>
+        Layers
+      </button>
+      <button
+        style={{
+          background: 'linear-gradient(90deg, #00291b 0%, #00a67e 100%)',
+          color: '#fff',
+          borderRadius: '5px',
+          padding: '5px 15px',
+          fontWeight: 'bold',
+          cursor: 'pointer',
+        }}
+        onClick={onDownloadClick}
+      >
+        Download
+      </button>
+    </div>
+  );
+});
+
 // ImageRemoveBackground
 const ImageRemoveBackground = observer(({ store, element }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showCreditsError, setShowCreditsError] = useState(false);
-  
-  // Use the credits context
+
   const { credits, consumeCredits, hasCredits } = useCreditsContext();
-  
-  // Force re-render on credits change
+
   const [, setForceUpdate] = useState(0);
-  
-  // Check credits on open
+
   useEffect(() => {
     if (isModalOpen) {
-      setForceUpdate(prev => prev + 1);
+      setForceUpdate((prev) => prev + 1);
     }
   }, [isModalOpen, credits]);
 
   const removeBackground = async () => {
-    // Check if user has enough credits
     if (!hasCredits) {
       setShowCreditsError(true);
       setError('Not enough credits. Please upgrade to Pro to get more credits.');
       return;
     }
-    
+
     if (!element || !element.src) return;
     setLoading(true);
     setError(null);
@@ -117,13 +369,12 @@ const ImageRemoveBackground = observer(({ store, element }) => {
         const errorMessage = await req.text();
         throw new Error(errorMessage || 'Error while removing background');
       }
-      
-      // Consume 1 credit after successful API call
+
       const consumed = consumeCredits(1);
       if (consumed) {
         toast.success('Background removed successfully! Used 1 credit.');
       }
-      
+
       const responseBlob = await req.blob();
       const resultUrl = URL.createObjectURL(responseBlob);
       element.set({ src: resultUrl });
@@ -137,86 +388,85 @@ const ImageRemoveBackground = observer(({ store, element }) => {
       }
     } finally {
       setLoading(false);
-      // Force UI to update with latest credit count
-      setForceUpdate(prev => prev + 1);
+      setForceUpdate((prev) => prev + 1);
     }
   };
 
   return (
-    <>
-      <button
-        onClick={() => setIsModalOpen(true)}
-        style={{
-          padding: '5px 15px',
-          borderRadius: '5px',
-          background: 'linear-gradient(90deg, #00291b 0%, #00a67e 100%)',
-          color: '#fff',
-          cursor: 'pointer',
-        }}
-        disabled={loading}
-      >
-        Remove Background
-      </button>
-      <Dialog
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Remove Background"
-        style={{ width: '400px' }}
-      >
-        <DialogBody>
-          <div style={{ textAlign: 'center' }}>
-            <img
-              src={element?.src}
-              alt="Selected"
-              style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain', marginBottom: '20px' }}
-            />
-            {loading && <p>Processing...</p>}
-            {error && (
-              <div style={{ color: 'red', marginTop: '10px' }}>
-                Error: {error}
-              </div>
-            )}
-            {!loading && !error && (
-              <div>
-                <p>Are you sure you want to remove the background of this image?</p>
-                <p style={{ fontWeight: 'bold', marginTop: '10px' }}>
-                  This action will use 1 credit. You have {credits} credits remaining.
-                </p>
-              </div>
-            )}
-            {showCreditsError && (
-              <div style={{ marginTop: '15px' }}>
+    <button
+      onClick={() => setIsModalOpen(true)}
+      style={{
+        padding: '5px 15px',
+        borderRadius: '5px',
+        background: 'linear-gradient(90deg, #00291b 0%, #00a67e 100%)',
+        color: '#fff',
+        cursor: 'pointer',
+        marginLeft: '10px',
+      }}
+      disabled={loading}
+    >
+      Remove Background
+      {isModalOpen && (
+        <Dialog
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title="Remove Background"
+          style={{ width: '400px' }}
+        >
+          <DialogBody>
+            <div style={{ textAlign: 'center' }}>
+              <img
+                src={element?.src}
+                alt="Selected"
+                style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain', marginBottom: '20px' }}
+              />
+              {loading && <p>Processing...</p>}
+              {error && (
+                <div style={{ color: 'red', marginTop: '10px' }}>
+                  Error: {error}
+                </div>
+              )}
+              {!loading && !error && (
+                <div>
+                  <p>Are you sure you want to remove the background of this image?</p>
+                  <p style={{ fontWeight: 'bold', marginTop: '10px' }}>
+                    This action will use 1 credit. You have {credits} credits remaining.
+                  </p>
+                </div>
+              )}
+              {showCreditsError && (
+                <div style={{ marginTop: '15px' }}>
+                  <Button
+                    intent="primary"
+                    text="Upgrade to Pro"
+                    onClick={() => {
+                      setIsModalOpen(false);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </DialogBody>
+          <DialogFooter
+            actions={
+              <>
+                <Button
+                  text="Cancel"
+                  onClick={() => setIsModalOpen(false)}
+                  disabled={loading}
+                />
                 <Button
                   intent="primary"
-                  text="Upgrade to Pro"
-                  onClick={() => {
-                    setIsModalOpen(false);
-                    // Add logic to open pricing modal if needed
-                  }}
+                  text="Confirm"
+                  onClick={removeBackground}
+                  disabled={loading || !hasCredits}
                 />
-              </div>
-            )}
-          </div>
-        </DialogBody>
-        <DialogFooter
-          actions={
-            <>
-              <Button
-                text="Cancel"
-                onClick={() => setIsModalOpen(false)}
-                disabled={loading}
-              />
-              <Button
-                intent="primary"
-                text="Confirm"
-                onClick={removeBackground}
-                disabled={loading || !hasCredits}
-              />
-            </>
-          }
-        />
-      </Dialog>
-    </>
+              </>
+            }
+          />
+        </Dialog>
+      )}
+    </button>
   );
 });
 
@@ -227,6 +477,7 @@ const Editor = () => {
   const [error, setError] = useState(null);
   const [store] = useState(createEditorStore);
   const [project] = useState(() => createProject({ store }));
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
   const stateData = location.state || {};
   const width = stateData.width || 1280;
@@ -316,6 +567,29 @@ const Editor = () => {
     fetchAndLoadTemplate();
   }, [templateId, projectId, store, routingData, project, fromCreateModal, width, height]);
 
+  // Prevent canvas interaction with locked elements
+  const handleCanvasSelect = (elements) => {
+    const selectedElements = elements.filter((el) => !el.locked);
+    if (selectedElements.length !== elements.length) {
+      // Some elements were filtered out because they are locked
+      store.selectElements(selectedElements.map((el) => el.id));
+    }
+  };
+
+  // Replace the default layers section with the custom one
+  const modifiedSections = DEFAULT_SECTIONS.map((section) => {
+    if (section.name === 'layers') {
+      return CustomLayersSection;
+    }
+    return section;
+  });
+
+  // Filter out 'templates' and 'elements' from the modified sections
+  const remainingDefaultSections = modifiedSections.filter(
+    (section) => section.name !== 'templates' && section.name !== 'elements'
+  );
+
+  // Arrange sections in the desired order: My Projects, Related Templates, Icons, Elements, then remaining default sections
   const sections = [
     MyProjectsSection,
     {
@@ -325,9 +599,7 @@ const Editor = () => {
     },
     IconsSection,
     CustomElements,
-    ...DEFAULT_SECTIONS.filter(
-      (section) => section.name !== 'templates' && section.name !== 'elements'
-    ),
+    ...remainingDefaultSections,
   ];
 
   if (loading) return <Loader text="Loading editor..." />;
@@ -338,23 +610,46 @@ const Editor = () => {
   return (
     <AuthProvider>
       <ProjectContext.Provider value={project}>
-        <div className="app-container">
+        <div className="app-container" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
           <Header />
-          <main className="main-content">
-            <div className="canvas-editor">
-              <PolotnoContainer>
+          <main className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div className="canvas-editor" style={{ flex: 1, display: 'flex' }}>
+              <PolotnoContainer style={{ width: '100%', height: '100%' }}>
                 <SidePanelWrap>
                   <SidePanel store={store} sections={sections} defaultSection="my-projects" />
                 </SidePanelWrap>
-                <WorkspaceWrap>
+                <WorkspaceWrap style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <Toolbar
                     store={store}
+                    downloadButtonEnabled={false}
                     components={{
-                      ActionControls,
-                      ImageRemoveBackground,
+                      ImageRemoveBackground: ImageRemoveBackground,
+                      ActionControls: (props) => (
+                        <ActionControls {...props} onDownloadClick={() => setIsExportDialogOpen(true)} />
+                      ),
+                    }}
+                    style={{
+                      backgroundColor: '#f0f0f0',
+                      border: '1px solid #ccc',
+                      padding: '10px',
+                      minHeight: '50px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      zIndex: 1000,
+                      flexWrap: 'wrap',
+                      overflowX: 'auto',
                     }}
                   />
-                  <Workspace store={store} />
+                  <ExportDialog
+                    isOpen={isExportDialogOpen}
+                    onClose={() => setIsExportDialogOpen(false)}
+                    store={store}
+                  />
+                  <Workspace
+                    store={store}
+                    style={{ flex: 1 }}
+                    onSelect={handleCanvasSelect} // Prevent selecting locked elements on canvas
+                  />
                   <ZoomButtons store={store} />
                   <PagesTimeline store={store} />
                 </WorkspaceWrap>
