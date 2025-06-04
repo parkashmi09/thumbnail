@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { PolotnoContainer, SidePanelWrap, WorkspaceWrap } from 'polotno';
 import { Workspace } from 'polotno/canvas/workspace';
-import { SidePanel, SectionTab } from 'polotno/side-panel';
+import { SidePanel, DEFAULT_SECTIONS } from 'polotno/side-panel';
 import { Toolbar } from 'polotno/toolbar/toolbar';
 import { PagesTimeline } from 'polotno/pages-timeline';
 import { ZoomButtons } from 'polotno/toolbar/zoom-buttons';
 import { createStore } from 'polotno/model/store';
-import { DEFAULT_SECTIONS } from 'polotno/side-panel';
 import { observer } from 'mobx-react-lite';
 import { Button, Dialog, DialogBody, DialogFooter } from '@blueprintjs/core';
 import { AuthProvider } from '../context/AuthContext';
@@ -20,6 +19,8 @@ import { MyProjectsSection } from '../components/MyProjectsSection/MyProjectsSec
 import { ProjectContext, createProject, useProject } from '../utils/project';
 import { useCreditsContext } from '../context/CreditsContext';
 import toast from 'react-hot-toast';
+import { IconsSection } from '../components/IconSection';
+
 
 // Create store instance function
 const createEditorStore = () => {
@@ -189,9 +190,8 @@ const ImageRemoveBackground = observer(({ store, element }) => {
                   intent="primary"
                   text="Upgrade to Pro"
                   onClick={() => {
-                    // Close this modal
                     setIsModalOpen(false);
-                    // You could add logic here to open the pricing modal
+                    // Add logic to open pricing modal if needed
                   }}
                 />
               </div>
@@ -240,7 +240,6 @@ const Editor = () => {
       ? JSON.parse(sessionStorage.getItem('templateRoutingData'))
       : null);
 
-  // Get project ID from URL parameters if coming from recent projects
   const urlParams = new URLSearchParams(location.search);
   const projectId = urlParams.get('projectId');
 
@@ -251,7 +250,6 @@ const Editor = () => {
   }, []);
 
   useEffect(() => {
-    // Set canvas size based on provided dimensions
     if (width > 0 && height > 0) {
       if (store.pages.length > 0) {
         store.pages[0].set({ width, height });
@@ -268,23 +266,16 @@ const Editor = () => {
       setLoading(true);
       setError(null);
       try {
-        // Case 1: Coming from CreateDesignModal with fromCreateModal flag
         if (fromCreateModal) {
-          // Clear any existing pages and elements to ensure a blank canvas
           store.clear();
           store.addPage({ width, height });
-          // Set project info for naming
           project.setTemplateInfo({
             name: `Custom Design ${Date.now()}`,
             templateId: null,
           });
-        }
-        // Case 2: Load specific project if projectId is provided
-        else if (projectId) {
+        } else if (projectId) {
           await project.loadById(projectId);
-        }
-        // Case 3: Load template if templateId is provided
-        else if (templateId && templateId !== 'new') {
+        } else if (templateId && templateId !== 'new') {
           let url = `https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/templates/${templateId}`;
           if (routingData) {
             const queryParams = new URLSearchParams();
@@ -308,15 +299,12 @@ const Editor = () => {
             const jsonRes = await fetch(tpl.jsonPath);
             const json = await jsonRes.json();
             await store.loadJSON(json);
-            // Set template information for better project naming
             project.setTemplateInfo({
               name: tpl.name || tpl.title || `Template Design ${Date.now()}`,
               templateId: tpl._id || tpl.id,
             });
           }
-        }
-        // Case 4: Load last project or create a blank canvas
-        else {
+        } else {
           await project.firstLoad();
         }
       } catch (e) {
@@ -335,6 +323,7 @@ const Editor = () => {
       templateId,
       Panel: (props) => <TemplatesSection.Panel {...props} routingData={routingData} />,
     },
+    IconsSection,
     CustomElements,
     ...DEFAULT_SECTIONS.filter(
       (section) => section.name !== 'templates' && section.name !== 'elements'
