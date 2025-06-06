@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { PolotnoContainer, SidePanelWrap, WorkspaceWrap } from 'polotno';
 import { Workspace } from 'polotno/canvas/workspace';
@@ -479,6 +479,10 @@ const Editor = () => {
   const [store] = useState(createEditorStore);
   const [project] = useState(() => createProject({ store }));
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState("");
+  const lastSavedJSON = useRef(null);
+  const hasChanges = useRef(false);
 
   const stateData = location.state || {};
   const width = stateData.width || 1280;
@@ -604,6 +608,75 @@ const Editor = () => {
     ...remainingDefaultSections,
   ];
 
+  // Save template to server
+  const saveTemplate = useCallback(async () => {
+    if (!templateId || isSaving || !hasChanges.current || templateId === 'new') return;
+
+    setIsSaving(true);
+    setSaveStatus("Saving...");
+
+    try {
+      const json = store.toJSON();
+
+      if (JSON.stringify(json) === JSON.stringify(lastSavedJSON.current)) {
+        setSaveStatus("No changes to save");
+        setTimeout(() => setSaveStatus(""), 2000);
+        return;
+      }
+
+      const response = await fetch(`https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/templates/${templateId}/json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(json),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      lastSavedJSON.current = json;
+      hasChanges.current = false;
+
+      setSaveStatus("Saved");
+      setTimeout(() => setSaveStatus(""), 2000);
+    } catch (err) {
+      console.error("Error saving template:", err);
+      setSaveStatus(`Error: ${err.message}`);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [templateId, isSaving, store]);
+
+  // Set up change listeners for auto-save
+  useEffect(() => {
+    if (!templateId || templateId === 'new') return;
+
+    const onChangeDisposer = store.on("change", () => {
+      hasChanges.current = true;
+      debounce(saveTemplate, 2000)();
+    });
+
+    return () => onChangeDisposer();
+  }, [templateId, saveTemplate]);
+
+  // Simple debounce function
+  const debounce = (func, delay) => {
+    let timer;
+    return function () {
+      clearTimeout(timer);
+      timer = setTimeout(() => func.apply(this, arguments), delay);
+    };
+  };
+
+  // Update lastSavedJSON when template is loaded
+  useEffect(() => {
+    if (store.pages.length > 0) {
+      lastSavedJSON.current = store.toJSON();
+      hasChanges.current = false;
+    }
+  }, [store.pages.length]);
+
   if (loading) return <Loader text="Loading editor..." />;
   if (error && templateId && templateId !== 'new') {
     return <div style={{ padding: 40, color: 'red', textAlign: 'center' }}>Error: {error}</div>;
@@ -614,6 +687,20 @@ const Editor = () => {
       <ProjectContext.Provider value={project}>
         <div className="app-container" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
           <Header />
+          {saveStatus && (
+            <div style={{
+              position: 'fixed',
+              top: '70px',
+              right: '20px',
+              padding: '8px 16px',
+              background: '#fff',
+              borderRadius: '4px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              zIndex: 1000
+            }}>
+              {saveStatus}
+            </div>
+          )}
           <main className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <div className="canvas-editor" style={{ flex: 1, display: 'flex' }}>
               <PolotnoContainer style={{ width: '100%', height: '100%' }}>
