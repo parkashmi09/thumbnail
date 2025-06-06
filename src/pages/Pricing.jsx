@@ -61,7 +61,8 @@ const fallbackPlans = [
 ];
 
 // API endpoint for pricing plans
-const API_URL = 'https://api.thumbnailcreator.com';
+const API_URL = 'https://dolphin-app-oxsn4.ondigitalocean.app/api/v1';
+const RAZORPAY_KEY_ID = 'rzp_test_EKVCvQ6b9DoeSm';
 
 const Pricing = ({ isModal = false }) => {
   const [isMobile, setIsMobile] = useState(false);
@@ -93,7 +94,7 @@ const Pricing = ({ isModal = false }) => {
     const fetchPricingPlans = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/api/pricing-plans`);
+        const response = await fetch(`${API_URL}/plans`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch pricing plans');
@@ -161,38 +162,87 @@ const Pricing = ({ isModal = false }) => {
         toast.error('Please login to purchase a plan');
         return;
       }
-      
-      // Prepare request for payment initiation
-      const paymentData = {
-        userId,
-        planId: plan._id,
-        promoCode: promoCode || null
-      };
-      
+
       // Show loading state
-      toast.loading('Initializing payment...');
+      const loadingToast = toast.loading('Initializing payment...');
       
       // Make API request to initiate payment
-      const response = await fetch(`${API_URL}/api/payments/initiate`, {
+      const response = await fetch(`${API_URL}/purchase-plan`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(paymentData)
+        body: JSON.stringify({
+          planId: plan._id,
+          userId: userId
+        })
       });
       
       if (!response.ok) {
         throw new Error('Failed to initiate payment');
       }
       
-      const { paymentUrl, orderId } = await response.json();
-      
-      // Store order ID in localStorage for verification after payment
-      localStorage.setItem('currentOrderId', orderId);
-      
-      // Redirect to payment gateway
-      window.location.href = paymentUrl;
+      const orderData = await response.json();
+      toast.dismiss(loadingToast);
+
+      // Initialize Razorpay
+      const options = {
+        key: RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Thumbnail Generator",
+        description: `Purchase ${plan.name}`,
+        order_id: orderData.id,
+        handler: async function (response) {
+          try {
+            // Verify payment
+            const verifyResponse = await fetch(`${API_URL}/verify-payment`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                orderId: orderData.id,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+                planId: plan._id,
+                userId: userId
+              })
+            });
+
+            if (!verifyResponse.ok) {
+              throw new Error('Payment verification failed');
+            }
+
+            const verifyData = await verifyResponse.json();
+            
+            if (verifyData.success) {
+              toast.success('Payment successful! Your plan has been activated.');
+              // Optionally refresh the page or update UI
+              window.location.reload();
+            } else {
+              throw new Error(verifyData.message || 'Payment verification failed');
+            }
+          } catch (error) {
+            console.error('Payment verification failed:', error);
+            toast.error('Payment verification failed. Please contact support.');
+          }
+        },
+        prefill: {
+          // You can prefill user details if available
+          // name: user.name,
+          // email: user.email,
+          // contact: user.phone
+        },
+        theme: {
+          color: "#3399cc"
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
       
     } catch (error) {
       console.error('Payment initiation failed:', error);
