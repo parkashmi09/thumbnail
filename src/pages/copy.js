@@ -15,6 +15,7 @@ import ActionControls from "./ActionControls";
 import { FontsTab } from "./FontsSection";
 import CustomElements from "./ElementsPanel";
 import { UploadSection } from "./UploadSection";
+import { useLocation } from "react-router-dom";
 
 // Create store instance
 const store = createStore({
@@ -22,7 +23,6 @@ const store = createStore({
   showCredit: true,
 });
 
-// Template cache
 const templateCache = new Map();
 
 const sections = [
@@ -37,21 +37,88 @@ const sections = [
 
 function Editor() {
   const { id } = useParams();
-  const [lastUpdated, setLastUpdated] = useState(Date.now());
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [saveStatus, setSaveStatus] = useState("");
   const lastSavedJSON = useRef(null);
   const hasChanges = useRef(false);
+  const saveTimer = useRef(null);
+  const location = useLocation();
+  const getDraftKey = (templateId) => `draft-${templateId}`;
 
-  // Optimized template loader
+  // Debounce utility
+  const debounce = (func, delay) => {
+    let timer;
+    return function (...args) {
+      clearTimeout(timer);
+      timer = setTimeout(() => func.apply(this, args), delay);
+    };
+  };
+
+  // Save to localStorage
+  const saveToLocal = useCallback(
+    debounce(() => {
+      if (!id) return;
+      const json = store.toJSON();
+      localStorage.setItem(getDraftKey(id), JSON.stringify(json));
+      hasChanges.current = true;
+    }, 1000),
+    [id]
+  );
+
+  // Sync to server
+  const syncToServer = useCallback(async () => {
+    if (!id || !hasChanges.current) return;
+
+    const local = localStorage.getItem(getDraftKey(id));
+    if (!local) return;
+
+    try {
+      const json = JSON.parse(local);
+
+      if (
+        lastSavedJSON.current &&
+        JSON.stringify(json) === JSON.stringify(lastSavedJSON.current)
+      ) {
+        return;
+      }
+
+      setSaveStatus("Syncing...");
+
+      const res = await fetch(`${IP}/api/v1/templates/${id}/json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(json),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to sync with server");
+      }
+
+      lastSavedJSON.current = json;
+      hasChanges.current = false;
+      localStorage.removeItem(getDraftKey(id));
+      setSaveStatus("Synced");
+      setTimeout(() => setSaveStatus(""), 2000);
+    } catch (err) {
+      console.error("Server sync failed:", err);
+      setSaveStatus("Sync failed");
+    }
+  }, [id]);
+
+  // Load template
   const loadTemplate = useCallback(async (templateId) => {
     if (!templateId) return;
 
     setIsLoading(true);
 
     try {
-      // Check cache first
+      const draft = localStorage.getItem(getDraftKey(templateId));
+      if (draft) {
+        store.loadJSON(JSON.parse(draft));
+        setIsLoading(false);
+        return;
+      }
+
       if (templateCache.has(templateId)) {
         const cached = templateCache.get(templateId);
         store.loadJSON(cached);
@@ -60,127 +127,73 @@ function Editor() {
         return;
       }
 
-      // Parallel fetch requests
-      const [jsonRes] = await Promise.all([
-        fetch(
-          `${IP}/api/v1/templates/${templateId}/json?timestamp=${Date.now()}`
-        ),
-      ]);
+      const res = await fetch(`${IP}/api/v1/templates/${templateId}/json`);
+      if (!res.ok) throw new Error("Fetch failed");
 
-      if (!jsonRes.ok) throw new Error("Failed to fetch template");
+      const json = await res.json();
 
-      const json = await jsonRes.json();
+      json.objects = (json.objects || []).map((obj) =>
+        obj.type === "image" ? { ...obj, crossOrigin: "anonymous" } : obj
+      );
 
-      // Optimize image loading
-      if (json.objects) {
-        json.objects = json.objects.map((obj) => {
-          if (obj.type === "image") {
-            return {
-              ...obj,
-              crossOrigin: "anonymous",
-              // Add placeholder if needed
-              // placeholder: "data:image/svg+xml,..."
-            };
-          }
-          return obj;
-        });
-      }
-
-      // Clear store efficiently
       store.clear();
-
-      // Load new template
       store.loadJSON(json);
-
-      // Cache the template
       templateCache.set(templateId, json);
       lastSavedJSON.current = json;
-      hasChanges.current = false;
     } catch (err) {
-      console.error("Error loading template:", err);
-      setSaveStatus(`Error loading: ${err.message}`);
+      console.error("Template load error:", err);
+      setSaveStatus("Load failed");
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Save template to server
-  const saveTemplate = useCallback(async () => {
-    if (!id || isSaving || !hasChanges.current) return;
-
-    setIsSaving(true);
-    setSaveStatus("Saving...");
-
-    try {
-      const json = store.toJSON();
-
-      if (JSON.stringify(json) === JSON.stringify(lastSavedJSON.current)) {
-        setSaveStatus("No changes to save");
-        setTimeout(() => setSaveStatus(""), 2000);
-        return;
-      }
-
-      const response = await fetch(`${IP}/api/v1/templates/${id}/json`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(json),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message || `HTTP error! status: ${response.status}`
-        );
-      }
-
-      // Update cache and last saved state
-      templateCache.set(id, json);
-      lastSavedJSON.current = json;
-      hasChanges.current = false;
-
-      setSaveStatus("Saved");
-      setTimeout(() => setSaveStatus(""), 2000);
-    } catch (err) {
-      console.error("Error saving template:", err);
-      setSaveStatus(`Error: ${err.message}`);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [id, isSaving]);
-
-  // Load template when ID changes
+  // Handle template updates
   useEffect(() => {
-    if (id) {
-      loadTemplate(id);
-    }
+    if (id) loadTemplate(id);
   }, [id, loadTemplate]);
 
-  // Set up change listeners
+  // Track store changes
   useEffect(() => {
     if (!id) return;
 
-    const onChangeDisposer = store.on("change", () => {
-      hasChanges.current = true;
-      debounce(saveTemplate, 2000)();
+    const disposer = store.on("change", () => {
+      saveToLocal();
     });
 
-    return () => onChangeDisposer();
-  }, [id, saveTemplate]);
+    return () => disposer();
+  }, [id, saveToLocal]);
 
-  // Simple debounce function
-  const debounce = (func, delay) => {
-    let timer;
-    return function () {
-      clearTimeout(timer);
-      timer = setTimeout(() => func.apply(this, arguments), delay);
+  // Sync to server every 30s
+  useEffect(() => {
+    if (!id) return;
+    saveTimer.current = setInterval(syncToServer, 30000);
+    return () => clearInterval(saveTimer.current);
+  }, [id, syncToServer]);
+
+  // Sync before unload
+  // useEffect(() => {
+  //   const handler = () => {
+  //     syncToServer();
+  //   };
+  //   window.addEventListener("beforeunload", handler);
+  //   return () => window.removeEventListener("beforeunload", handler);
+  // }, [syncToServer]);
+
+  useEffect(() => {
+    return () => {
+      // This runs on component unmount (route change)
+      syncToServer().then(() => {
+        if (id) {
+          // 1. Clear draft from localStorage
+          localStorage.removeItem(getDraftKey(id));
+          // 2. Clear cached template
+          templateCache.delete(id);
+          console.log(`Cleared draft and cache for template ${id}`);
+        }
+      });
     };
-  };
-
-  const handleTemplateUpdate = () => {
-    // Clear cache for this template to force reload
-    if (id) templateCache.delete(id);
-    setLastUpdated(Date.now());
-  };
+  }, [location]);
 
   return (
     <div className="w-screen h-screen flex flex-col overflow-hidden">
@@ -201,14 +214,14 @@ function Editor() {
                 store={store}
                 components={{
                   ActionControls: () => (
-                    <>
-                      <ActionControls
-                        store={store}
-                        templateId={id}
-                        onUpdate={handleTemplateUpdate}
-                      />
-                      
-                    </>
+                    <ActionControls
+                      store={store}
+                      templateId={id}
+                      onUpdate={() => {
+                        templateCache.delete(id);
+                        loadTemplate(id);
+                      }}
+                    />
                   ),
                 }}
               />
@@ -218,6 +231,12 @@ function Editor() {
             </WorkspaceWrap>
           </PolotnoContainer>
         </div>
+
+        {saveStatus && (
+          <div className="absolute bottom-2 right-2 bg-gray-800 text-white px-4 py-1 rounded text-sm shadow-lg z-50">
+            {saveStatus}
+          </div>
+        )}
       </main>
     </div>
   );

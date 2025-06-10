@@ -34,6 +34,8 @@ const createEditorStore = () => {
   return store;
 };
 
+const templateCache = new Map();
+
 // resizeImage utility
 const resizeImage = (blob, maxPixels = 250000) => {
   return new Promise((resolve, reject) => {
@@ -71,29 +73,22 @@ const resizeImage = (blob, maxPixels = 250000) => {
 const CustomLayersPanel = observer(({ store }) => {
   const activePage = store.activePage;
 
-  console.log('activePage', activePage);
-
   if (!activePage) return <div>No active page</div>;
+
+  // Log the elements being rendered
+  console.log('CustomLayersPanel - Active page elements:', activePage.children);
+  console.log('CustomLayersPanel - Store selected elements:', store.selectedElements);
 
   const handleSelectElement = (element) => {
     store.selectElements([element.id]);
   };
 
   const handleToggleVisibility = (element) => {
-
     element.set({ visible: !element.visible });
   };
 
   const handleToggleLock = (element) => {
     element.set({ draggable: !element.draggable });
-    // console.log('element before toggle****', element);
-
-    // element.set({
-    //   locked: !element.locked,
-    //   draggable: !element.locked,
-    //   resizable: !element.locked,
-    // });
-   
   };
 
   const handleDelete = (elementId) => {
@@ -115,7 +110,6 @@ const CustomLayersPanel = observer(({ store }) => {
             cursor: 'pointer',
           }}
         >
-          {/* Image Preview for Image Elements */}
           {element.type === 'image' && element.src && (
             <img
               src={element.src}
@@ -128,11 +122,10 @@ const CustomLayersPanel = observer(({ store }) => {
                 borderRadius: '3px',
               }}
               onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/30?text=Error'; // Fallback image
+                e.target.src = 'https://via.placeholder.com/30?text=Error';
               }}
             />
           )}
-          {/* Placeholder for Non-Image Elements */}
           {element.type !== 'image' && (
             <div
               style={{
@@ -151,12 +144,10 @@ const CustomLayersPanel = observer(({ store }) => {
               {element.type.toUpperCase().charAt(0)}
             </div>
           )}
-          {/* Element Type and Name */}
           <div style={{ flex: 1 }}>
             <span style={{ fontWeight: 'bold' }}>{element.type.toUpperCase()}</span>
             <span style={{ marginLeft: '5px' }}>{element.name || element.id}</span>
           </div>
-          {/* Visibility Toggle */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -189,14 +180,13 @@ const CustomLayersPanel = observer(({ store }) => {
               )}
             </svg>
           </button>
-          {/* Lock Toggle */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleToggleLock(element);
             }}
             style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer' }}
-            title={element.locked ? 'Unlock' : 'Lock'}
+            title={element.draggable ? 'Lock' : 'Unlock'}
           >
             <svg
               width="16"
@@ -207,22 +197,21 @@ const CustomLayersPanel = observer(({ store }) => {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              style={{ color: element.locked ? '#000' : '#888' }}
+              style={{ color: element.draggable ? '#888' : '#000' }}
             >
-              {!element.draggable ? (
-                <>
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </>
-              ) : (
+              {element.draggable ? (
                 <>
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                   <path d="M7 11V7a5 5 0 0 1 9.9-1" />
                 </>
+              ) : (
+                <>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </>
               )}
             </svg>
           </button>
-          {/* Delete Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -257,15 +246,13 @@ const CustomLayersPanel = observer(({ store }) => {
 // Custom Layers Section
 const CustomLayersSection = {
   name: 'layers',
-  Tab: () => null, // Keep the tab hidden as per your current setup
+  Tab: () => null,
   Panel: CustomLayersPanel,
 };
 
 // ActionControls component
 const ActionControls = React.memo(({ store, onDownloadClick }) => {
-  console.log('ActionControls rendering');
   const handleOpenLayers = () => {
-    console.log('Opening Layers panel');
     store.openSidePanel('layers');
   };
 
@@ -330,9 +317,7 @@ const ImageRemoveBackground = observer(({ store, element }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showCreditsError, setShowCreditsError] = useState(false);
-
   const { credits, consumeCredits, hasCredits } = useCreditsContext();
-
   const [, setForceUpdate] = useState(0);
 
   useEffect(() => {
@@ -476,13 +461,168 @@ const Editor = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [saveStatus, setSaveStatus] = useState("");
   const [store] = useState(createEditorStore);
   const [project] = useState(() => createProject({ store }));
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState("");
-  const lastSavedJSON = useRef(null);
+  const getDraftKey = (templateId) => `draft-${templateId}`;
   const hasChanges = useRef(false);
+  const lastSavedJSON = useRef(null);
+  const saveTimer = useRef(null);
+  
+
+  // Debounce utility
+  const debounce = (func, delay) => {
+    let timer;
+    return function (...args) {
+      clearTimeout(timer);
+      timer = setTimeout(() => func.apply(this, args), delay);
+    };
+  };
+
+  // Save to localStorage
+  const saveToLocal = useCallback(
+    debounce(() => {
+      if (!templateId) return;
+      const json = store.toJSON();
+      localStorage.setItem(getDraftKey(templateId), JSON.stringify(json));
+      hasChanges.current = true;
+    }, 1000),
+    [templateId]
+  );
+
+  // Sync to server
+  const syncToServer = useCallback(async () => {
+    if (!templateId || !hasChanges.current) return;
+
+    const local = localStorage.getItem(getDraftKey(templateId));
+    if (!local) return;
+
+    try {
+      const json = JSON.parse(local);
+
+      if (
+        lastSavedJSON.current &&
+        JSON.stringify(json) === JSON.stringify(lastSavedJSON.current)
+      ) {
+        return;
+      }
+
+      setSaveStatus("Syncing...");
+
+      const res = await fetch(`https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/templates/${templateId}/json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(json),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to sync with server");
+      }
+
+      lastSavedJSON.current = json;
+      hasChanges.current = false;
+      localStorage.removeItem(getDraftKey(templateId));
+      setSaveStatus("Synced");
+      setTimeout(() => setSaveStatus(""), 2000);
+    } catch (err) {
+      console.error("Server sync failed:", err);
+      setSaveStatus("Sync failed");
+    }
+  }, [templateId]);
+
+  // Load template
+  const loadTemplate = useCallback(async (templateId) => {
+    if (!templateId) return;
+
+    setLoading(true);
+
+    try {
+      const draft = localStorage.getItem(getDraftKey(templateId));
+      if (draft) {
+        store.loadJSON(JSON.parse(draft));
+        setLoading(false);
+        return;
+      }
+
+      if (templateCache.has(templateId)) {
+        const cached = templateCache.get(templateId);
+        store.loadJSON(cached);
+        lastSavedJSON.current = cached;
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(`https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/templates/${templateId}/json`);
+      if (!res.ok) throw new Error("Fetch failed");
+
+      const json = await res.json();
+
+      json.objects = (json.objects || []).map((obj) =>
+        obj.type === "image" ? { ...obj, crossOrigin: "anonymous" } : obj
+      );
+
+      store.clear();
+      store.loadJSON(json);
+      templateCache.set(templateId, json);
+      lastSavedJSON.current = json;
+    } catch (err) {
+      console.error("Template load error:", err);
+      setSaveStatus("Load failed");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Handle template updates
+  useEffect(() => {
+    if (templateId) loadTemplate(templateId);
+  }, [templateId, loadTemplate]);
+
+  // Track store changes
+  useEffect(() => {
+    if (!templateId) return;
+
+    const disposer = store.on("change", () => {
+      saveToLocal();
+    });
+
+    return () => disposer();
+  }, [templateId, saveToLocal]);
+
+  // Sync to server every 30s
+  useEffect(() => {
+    if (!templateId) return;
+    saveTimer.current = setInterval(syncToServer, 30000);
+    return () => clearInterval(saveTimer.current);
+  }, [templateId, syncToServer]);
+
+  // Sync before unload
+  // useEffect(() => {
+  //   const handler = () => {
+  //     syncToServer();
+  //   };
+  //   window.addEventListener("beforeunload", handler);
+  //   return () => window.removeEventListener("beforeunload", handler);
+  // }, [syncToServer]);
+
+  useEffect(() => {
+    return () => {
+      // This runs on component unmount (route change)
+      syncToServer().then(() => {
+        if (templateId) {
+          // 1. Clear draft from localStorage
+          localStorage.removeItem(getDraftKey(templateId));
+          // 2. Clear cached template
+          templateCache.delete(templateId);
+          console.log(`Cleared draft and cache for template ${templateId}`);
+        }
+      });
+    };
+  }, [location]);
+
+
+
 
   const stateData = location.state || {};
   const width = stateData.width || 1280;
@@ -499,11 +639,64 @@ const Editor = () => {
   const urlParams = new URLSearchParams(location.search);
   const projectId = urlParams.get('projectId');
 
+  console.log('Editor state data:', {
+    width,
+    height,
+    unit,
+    dpi,
+    fromCreateModal,
+    routingData,
+    projectId
+  });
+
+  // Add watermark to all pages
+  const addWatermark = useCallback(() => {
+
+    store.pages.forEach((page, index) => {
+
+      // Check if watermark already exists to avoid duplicates
+      const existingWatermark = page.children.find((el) => el.name === 'watermark');
+      if (!existingWatermark) {
+        console.log(`Adding watermark to page ${index}`);
+        page.addElement({
+          type: 'image',
+          src: 'https://example.com/watermark.png', // Replace with your actual watermark URL
+          name: 'watermark',
+          selectable: false,
+          alwaysOnTop: true,
+          showInExport: true,
+          x: page.width - 150 - 20, // Bottom-right corner with 20px inset
+          y: page.height - 50 - 20,
+          width: 150,
+          height: 50,
+          opacity: 0.7,
+        });
+      } else {
+        console.log(`Watermark already exists on page ${index}`);
+      }
+      console.log(`Page ${index} elements after watermark:`, page.children.length);
+    });
+  }, [store]);
+
+  // Apply watermark on initial load and when pages change
+  useEffect(() => {
+    addWatermark();
+    // Listen for page additions or changes
+    const disposer = store.on('change', () => {
+      addWatermark();
+    });
+    return () => disposer();
+  }, [addWatermark, store]);
+
   useEffect(() => {
     if (sessionStorage.getItem('templateRoutingData')) {
       sessionStorage.removeItem('templateRoutingData');
     }
   }, []);
+
+
+
+
 
   useEffect(() => {
     if (width > 0 && height > 0) {
@@ -514,69 +707,131 @@ const Editor = () => {
       if (unit && ['px', 'mm', 'cm', 'in'].includes(unit)) {
         store.setUnit({ unit, dpi });
       }
+      addWatermark(); // Ensure watermark is added after setting page size
     }
-  }, [width, height, unit, dpi, store]);
+  }, [width, height, unit, dpi, store, addWatermark]);
 
-  useEffect(() => {
-    const fetchAndLoadTemplate = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        if (fromCreateModal) {
-          store.clear();
-          store.addPage({ width, height });
-          project.setTemplateInfo({
-            name: `Custom Design ${Date.now()}`,
-            templateId: null,
-          });
-        } else if (projectId) {
-          await project.loadById(projectId);
-        } else if (templateId && templateId !== 'new') {
-          let url = `https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/templates/${templateId}`;
-          if (routingData) {
-            const queryParams = new URLSearchParams();
-            if (
-              routingData.type === 'subCategories' &&
-              routingData.data &&
-              routingData.data.length > 0
-            ) {
-              queryParams.append('subCategoryId', routingData.data[0]._id);
-            } else if (routingData.type === 'category' && routingData.data) {
-              queryParams.append('categoryId', routingData.data._id);
-            }
-            if (queryParams.toString()) {
-              url += `?${queryParams.toString()}`;
-            }
-          }
-          const res = await fetch(url);
-          if (!res.ok) throw new Error('Template not found');
-          const tpl = await res.json();
-          if (tpl.jsonPath) {
-            const jsonRes = await fetch(tpl.jsonPath);
-            const json = await jsonRes.json();
-            await store.loadJSON(json);
-            project.setTemplateInfo({
-              name: tpl.name || tpl.title || `Template Design ${Date.now()}`,
-              templateId: tpl._id || tpl.id,
-            });
-          }
-        } else {
-          await project.firstLoad();
-        }
-      } catch (e) {
-        setError(e.message);
-      } finally {
+ // Load template and handle autosave
+useEffect(() => {
+  const fetchAndLoadTemplate = async () => {
+    if (!templateId && !projectId && !fromCreateModal) {
+      console.log('No templateId, projectId, or fromCreateModal provided. Loading default project.');
+      await project.firstLoad();
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Check for local draft first
+      const draftKey = getDraftKey(templateId);
+      const draft = localStorage.getItem(draftKey);
+      if (draft) {
+        console.log('Loading draft from localStorage:', draftKey);
+        store.loadJSON(JSON.parse(draft));
         setLoading(false);
+        return;
       }
-    };
-    fetchAndLoadTemplate();
-  }, [templateId, projectId, store, routingData, project, fromCreateModal, width, height]);
 
-  // Prevent canvas interaction with locked elements
+      // Check template cache
+      if (templateCache.has(templateId)) {
+        console.log('Loading template from cache:', templateId);
+        const cached = templateCache.get(templateId);
+        store.loadJSON(cached);
+        lastSavedJSON.current = cached;
+        setLoading(false);
+        return;
+      }
+
+      // Handle different loading scenarios
+      if (fromCreateModal) {
+        console.log('Creating new design from modal with dimensions:', { width, height });
+        store.clear();
+        store.addPage({ width, height });
+        project.setTemplateInfo({
+          name: `Custom Design ${Date.now()}`,
+          templateId: null,
+        });
+      } else if (projectId) {
+        console.log('Loading project by ID:', projectId);
+        await project.loadById(projectId);
+      } else if (templateId && templateId !== 'new') {
+        console.log('Loading template by ID:', templateId);
+        console.log('Routing data:', routingData);
+
+        let url = `https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/templates/${templateId}`;
+        if (routingData) {
+          const queryParams = new URLSearchParams();
+          if (routingData.type === 'subCategories' && routingData.data && routingData.data.length > 0) {
+            queryParams.append('subCategoryId', routingData.data[0]._id);
+          } else if (routingData.type === 'category' && routingData.data) {
+            queryParams.append('categoryId', routingData.data._id);
+          }
+          if (queryParams.toString()) {
+            url += `?${queryParams.toString()}`;
+          }
+        }
+
+        console.log('Fetching template from URL:', url);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Template not found');
+        const tpl = await res.json();
+        console.log('Template metadata received:', tpl);
+
+        if (tpl.jsonPath) {
+          console.log('Fetching template JSON from:', tpl.jsonPath);
+          const jsonRes = await fetch(tpl.jsonPath);
+          if (!jsonRes.ok) throw new Error('Failed to fetch template JSON');
+          const json = await jsonRes.json();
+          console.log('Template JSON loaded:', json);
+          console.log('Template JSON structure:', {
+            pages: json.pages?.length || 0,
+            elements: json.pages?.[0]?.children?.length || 0,
+            pageSize: json.pages?.[0] ? { width: json.pages[0].width, height: json.pages[0].height } : null,
+          });
+
+          // Modify image elements to include crossOrigin
+          json.pages = json.pages.map((page) => ({
+            ...page,
+            children: page.children.map((obj) =>
+              obj.type === 'image' ? { ...obj, crossOrigin: 'anonymous' } : obj
+            ),
+          }));
+
+          store.clear();
+          store.loadJSON(json);
+          templateCache.set(templateId, json);
+          lastSavedJSON.current = json;
+
+          project.setTemplateInfo({
+            name: tpl.name || tpl.title || `Template Design ${Date.now()}`,
+            templateId: tpl._id || tpl.id,
+          });
+        } else {
+          throw new Error('Template JSON path not provided');
+        }
+      } else {
+        console.log('Loading default project (no template ID)');
+        await project.firstLoad();
+      }
+
+      addWatermark(); // Add watermark after loading template
+    } catch (e) {
+      console.error('Error loading template:', e);
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchAndLoadTemplate();
+}, [templateId, projectId, store, routingData, project, fromCreateModal, width, height, addWatermark]);
+  // Prevent canvas interaction with watermark and locked elements
   const handleCanvasSelect = (elements) => {
-    const selectedElements = elements.filter((el) => !el.locked);
+    const selectedElements = elements.filter((el) => !el.locked && el.name !== 'watermark');
     if (selectedElements.length !== elements.length) {
-      // Some elements were filtered out because they are locked
       store.selectElements(selectedElements.map((el) => el.id));
     }
   };
@@ -594,6 +849,16 @@ const Editor = () => {
     (section) => section.name !== 'templates' && section.name !== 'elements' && section.name !== 'upload'
   );
 
+
+
+
+      // Handle template updates
+  useEffect(() => {
+    if (templateId) loadTemplate(templateId);
+  }, [templateId, loadTemplate]);
+  
+
+
   // Arrange sections in the desired order
   const sections = [
     MyProjectsSection,
@@ -608,99 +873,32 @@ const Editor = () => {
     ...remainingDefaultSections,
   ];
 
-  // Save template to server
-  const saveTemplate = useCallback(async () => {
-    if (!templateId || isSaving || !hasChanges.current || templateId === 'new') return;
-
-    setIsSaving(true);
-    setSaveStatus("Saving...");
-
-    try {
-      const json = store.toJSON();
-
-      if (JSON.stringify(json) === JSON.stringify(lastSavedJSON.current)) {
-        setSaveStatus("No changes to save");
-        setTimeout(() => setSaveStatus(""), 2000);
-        return;
-      }
-
-      const response = await fetch(`https://dolphin-app-oxsn4.ondigitalocean.app/api/v1/templates/${templateId}/json`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(json),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      lastSavedJSON.current = json;
-      hasChanges.current = false;
-
-      setSaveStatus("Saved");
-      setTimeout(() => setSaveStatus(""), 2000);
-    } catch (err) {
-      console.error("Error saving template:", err);
-      setSaveStatus(`Error: ${err.message}`);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [templateId, isSaving, store]);
-
-  // Set up change listeners for auto-save
-  useEffect(() => {
-    if (!templateId || templateId === 'new') return;
-
-    const onChangeDisposer = store.on("change", () => {
-      hasChanges.current = true;
-      debounce(saveTemplate, 2000)();
-    });
-
-    return () => onChangeDisposer();
-  }, [templateId, saveTemplate]);
-
-  // Simple debounce function
-  const debounce = (func, delay) => {
-    let timer;
-    return function () {
-      clearTimeout(timer);
-      timer = setTimeout(() => func.apply(this, arguments), delay);
-    };
-  };
-
-  // Update lastSavedJSON when template is loaded
-  useEffect(() => {
-    if (store.pages.length > 0) {
-      lastSavedJSON.current = store.toJSON();
-      hasChanges.current = false;
-    }
-  }, [store.pages.length]);
-
   if (loading) return <Loader text="Loading editor..." />;
   if (error && templateId && templateId !== 'new') {
     return <div style={{ padding: 40, color: 'red', textAlign: 'center' }}>Error: {error}</div>;
   }
+
+
+  // useEffect(() => {
+  //   return () => {
+  //     // This runs on component unmount (route change)
+  //     syncToServer().then(() => {
+  //       if (id) {
+  //         // 1. Clear draft from localStorage
+  //         localStorage.removeItem(getDraftKey(id));
+  //         // 2. Clear cached template
+  //         templateCache.delete(id);
+  //         console.log(`Cleared draft and cache for template ${id}`);
+  //       }
+  //     });
+  //   };
+  // }, [location]);
 
   return (
     <AuthProvider>
       <ProjectContext.Provider value={project}>
         <div className="app-container" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
           <Header />
-          {saveStatus && (
-            <div style={{
-              position: 'fixed',
-              top: '70px',
-              right: '20px',
-              padding: '8px 16px',
-              background: '#fff',
-              borderRadius: '4px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              zIndex: 1000
-            }}>
-              {saveStatus}
-            </div>
-          )}
           <main className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <div className="canvas-editor" style={{ flex: 1, display: 'flex' }}>
               <PolotnoContainer style={{ width: '100%', height: '100%' }}>
@@ -737,7 +935,7 @@ const Editor = () => {
                   <Workspace
                     store={store}
                     style={{ flex: 1 }}
-                    onSelect={handleCanvasSelect} // Prevent selecting locked elements on canvas
+                    onSelect={handleCanvasSelect}
                   />
                   <ZoomButtons store={store} />
                   <PagesTimeline store={store} />
