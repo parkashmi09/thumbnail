@@ -37,192 +37,229 @@ const AboutUs = () => {
   return (
     <div className="about-page">
       <Header />
-      
-     <div className="container">
+      <div className="container">
+        <div className="about-container">
+          <div className="about-header">
+            <button className="back-button" onClick={() => navigate(-1)}>
+              <ArrowLeft size={20} />
+              <span>Back</span>
+            </button>
+            <h1>About Thumbnail Guru</h1>
+          </div>
 
-     <div className="about-container">
-        <div className="about-header">
-          <button className="back-button" onClick={() => navigate(-1)}>
-            <ArrowLeft size={20} />
-            <span>Back</span>
-          </button>
-          
-          <h1>About Thumbnail Guru</h1>
-          <p className="tagline">Empowering creators to make stunning thumbnails that drive engagement</p>
-        </div>
-        
-        <div className="about-hero">
-          <div className="hero-content">
-            <h2>Our Story</h2>
+          {/* New content section */}
+          <section className="about-company-info">
+            <h2>About Us</h2>
             <p>
-              Thumbnail Guru was born from a simple observation: even the best content 
-              struggles to find an audience without an eye-catching thumbnail. 
-              Founded in 2023, we set out to create a tool that makes professional-quality 
-              thumbnail creation accessible to everyone, regardless of design experience.
+              <strong>Thumbnail Guru</strong> was established in <strong>March 2025</strong> in <strong>Lucknow, India</strong>. Since our launch, we've been dedicated to simplifying thumbnail creation for content creators, educators, and businesses.
             </p>
             <p>
-              What started as a small project has grown into a platform used by thousands 
-              of content creators worldwide, from YouTube stars to small business owners 
-              and everyone in between.
+              We offer an easy-to-use platform that helps users create professional thumbnails in seconds — without the need for graphic design experience. Our goal is to save your time and effort while giving your content a professional edge.
             </p>
-          </div>
-          <div className="hero-image">
-            <img 
-              src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&auto=format&fit=crop&q=60" 
-              alt="Team working on designs" 
-            />
-          </div>
-        </div>
-        
-        <div className="mission-section">
-          <div className="mission-card">
-            <div className="icon-container">
-              <Heart size={32} />
+            <p>
+              We proudly serve users across India, and we are committed to constantly improving our tools, templates, and features to support the growing needs of the Indian creator community.
+            </p>
+          </section>
+
+          <section className="about-company-info">
+            <h2>Get to know us!</h2>
+            <p>
+              Thumbnail Guru was established in <strong>May 2025</strong> in <strong>Delhi, India</strong>. We started with a simple idea — to help creators design professional thumbnails without needing advanced graphic design skills. Since then, we've been focused on building tools that save time and make design fast, easy, and affordable.
+            </p>
+            <p>
+              We provide a feature-rich online platform for creating YouTube and social media thumbnails. With ready-made templates, custom fonts, watermark features, and real-time editing, users across India trust us for their content creation needs.
+            </p>
+            <p>
+              We focus on offering clear product features, user-friendly design, and extremely competitive pricing to support creators of all levels — students, teachers, influencers, and business professionals.
+            </p>
+          </section>
+
+          <section className="about-company-info">
+            <h2>🙌 Why Choose Us?</h2>
+            <ul className="about-why-list">
+              <li>Fast and easy-to-use thumbnail editor</li>
+              <li>No design experience required</li>
+              <li>Professionally made templates</li>
+              <li>Fully online, no software needed</li>
+              <li>Trusted by thousands of Indian users</li>
+            </ul>
+            <p style={{marginTop: '1rem'}}>
+              When you're using <strong>Thumbnail Guru</strong>, you can be confident that you're working with a platform made by Indian creators, for Indian creators.
+            </p>
+          </section>
+
+          {/* <div className="about-hero">
+            <div className="hero-content">
+              <h2>Our Story</h2>
+              <p>
+                Thumbnail Guru was born from a simple observation: even the best content 
+                struggles to find an audience without an eye-catching thumbnail. 
+                Founded in 2023, we set out to create a tool that makes professional-quality 
+                thumbnail creation accessible to everyone, regardless of design experience.
+              </p>
+              <p>
+                What started as a small project has grown into a platform used by thousands 
+                of content creators worldwide, from YouTube stars to small business owners 
+                and everyone in between.
+              </p>
             </div>
-            <h3>Our Mission</h3>
-            <p>
-              To democratize thumbnail design by providing intuitive tools that help creators 
-              of all skill levels make professional-quality thumbnails that drive engagement.
-            </p>
-          </div>
-          
-          <div className="mission-card">
-            <div className="icon-container">
-              <Target size={32} />
+            <div className="hero-image">
+              <img 
+                src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&auto=format&fit=crop&q=60" 
+                alt="Team working on designs" 
+              />
             </div>
-            <h3>Our Vision</h3>
-            <p>
-              A world where every creator can easily express their visual identity and connect 
-              with their audience through compelling thumbnail design.
-            </p>
           </div>
           
-          <div className="mission-card">
-            <div className="icon-container">
-              <Zap size={32} />
+          <div className="mission-section">
+            <div className="mission-card">
+              <div className="icon-container">
+                <Heart size={32} />
+              </div>
+              <h3>Our Mission</h3>
+              <p>
+                To democratize thumbnail design by providing intuitive tools that help creators 
+                of all skill levels make professional-quality thumbnails that drive engagement.
+              </p>
             </div>
-            <h3>Our Values</h3>
-            <p>
-              Creativity, accessibility, innovation, and community guide everything we do 
-              at Thumbnail Guru.
-            </p>
+            
+            <div className="mission-card">
+              <div className="icon-container">
+                <Target size={32} />
+              </div>
+              <h3>Our Vision</h3>
+              <p>
+                A world where every creator can easily express their visual identity and connect 
+                with their audience through compelling thumbnail design.
+              </p>
+            </div>
+            
+            <div className="mission-card">
+              <div className="icon-container">
+                <Zap size={32} />
+              </div>
+              <h3>Our Values</h3>
+              <p>
+                Creativity, accessibility, innovation, and community guide everything we do 
+                at Thumbnail Guru.
+              </p>
+            </div>
           </div>
-        </div>
-        
-        <div className="stats-section">
-          <div className="stat-item">
-            <span className="stat-number">10M+</span>
-            <span className="stat-label">Thumbnails Created</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-number">200K+</span>
-            <span className="stat-label">Active Users</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-number">150+</span>
-            <span className="stat-label">Countries</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-number">4.8/5</span>
-            <span className="stat-label">User Rating</span>
-          </div>
-        </div>
-        
-        <div className="team-section">
-          <h2>Meet Our Team</h2>
-          <p className="team-intro">
-            We're a diverse team of designers, engineers, and content creators 
-            passionate about helping creators succeed.
-          </p>
           
-          <div className="team-grid">
-            {teamMembers.map((member, index) => (
-              <div className="team-member" key={index}>
-                <div className="member-image">
-                  <img src={member.image} alt={member.name} />
+          <div className="stats-section">
+            <div className="stat-item">
+              <span className="stat-number">10M+</span>
+              <span className="stat-label">Thumbnails Created</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">200K+</span>
+              <span className="stat-label">Active Users</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">150+</span>
+              <span className="stat-label">Countries</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">4.8/5</span>
+              <span className="stat-label">User Rating</span>
+            </div>
+          </div>
+          
+          <div className="team-section">
+            <h2>Meet Our Team</h2>
+            <p className="team-intro">
+              We're a diverse team of designers, engineers, and content creators 
+              passionate about helping creators succeed.
+            </p>
+            
+            <div className="team-grid">
+              {teamMembers.map((member, index) => (
+                <div className="team-member" key={index}>
+                  <div className="member-image">
+                    <img src={member.image} alt={member.name} />
+                  </div>
+                  <h3>{member.name}</h3>
+                  <span className="member-role">{member.role}</span>
+                  <p className="member-bio">{member.bio}</p>
                 </div>
-                <h3>{member.name}</h3>
-                <span className="member-role">{member.role}</span>
-                <p className="member-bio">{member.bio}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <div className="values-section">
-          <h2>Why Choose Thumbnail Guru?</h2>
-          
-          <div className="values-grid">
-            <div className="value-item">
-              <div className="value-icon">
-                <Users size={28} />
-              </div>
-              <h3>Made By Creators, For Creators</h3>
-              <p>
-                Our team includes content creators who understand the challenges 
-                you face and the tools you need to succeed.
-              </p>
-            </div>
-            
-            <div className="value-item">
-              <div className="value-icon">
-                <Award size={28} />
-              </div>
-              <h3>Professional Results, No Experience Required</h3>
-              <p>
-                Our intuitive editor and templates help you create professional-quality 
-                thumbnails in minutes, even if you've never designed before.
-              </p>
-            </div>
-            
-            <div className="value-item">
-              <div className="value-icon">
-                <Zap size={28} />
-              </div>
-              <h3>Constantly Evolving</h3>
-              <p>
-                We regularly add new features, templates, and design elements based on 
-                user feedback and industry trends.
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="cta-section">
-          <h2>Ready to create eye-catching thumbnails?</h2>
-          <p>Join thousands of creators who trust Thumbnail Guru for their design needs.</p>
-          <button className="cta-button" onClick={() => navigate('/')}>
-            Start Creating Now
-          </button>
-        </div>
-        
-        <div className="about-footer">
-          <div className="social-links">
-            <h3>Connect With Us</h3>
-            <div className="social-icons">
-              <a href="#" className="social-icon">
-                <Twitter size={24} />
-              </a>
-              <a href="#" className="social-icon">
-                <Instagram size={24} />
-              </a>
-              <a href="#" className="social-icon">
-                <Linkedin size={24} />
-              </a>
-              <a href="#" className="social-icon">
-                <Github size={24} />
-              </a>
+              ))}
             </div>
           </div>
           
-          <div className="contact-info">
-            <h3>Contact Us</h3>
-            <p>hello@thumbnailguru.com</p>
-            <p>123 Creative Ave, San Francisco, CA 94103</p>
+          <div className="values-section">
+            <h2>Why Choose Thumbnail Guru?</h2>
+            
+            <div className="values-grid">
+              <div className="value-item">
+                <div className="value-icon">
+                  <Users size={28} />
+                </div>
+                <h3>Made By Creators, For Creators</h3>
+                <p>
+                  Our team includes content creators who understand the challenges 
+                  you face and the tools you need to succeed.
+                </p>
+              </div>
+              
+              <div className="value-item">
+                <div className="value-icon">
+                  <Award size={28} />
+                </div>
+                <h3>Professional Results, No Experience Required</h3>
+                <p>
+                  Our intuitive editor and templates help you create professional-quality 
+                  thumbnails in minutes, even if you've never designed before.
+                </p>
+              </div>
+              
+              <div className="value-item">
+                <div className="value-icon">
+                  <Zap size={28} />
+                </div>
+                <h3>Constantly Evolving</h3>
+                <p>
+                  We regularly add new features, templates, and design elements based on 
+                  user feedback and industry trends.
+                </p>
+              </div>
+            </div>
           </div>
+          
+          <div className="cta-section">
+            <h2>Ready to create eye-catching thumbnails?</h2>
+            <p>Join thousands of creators who trust Thumbnail Guru for their design needs.</p>
+            <button className="cta-button" onClick={() => navigate('/')}>
+              Start Creating Now
+            </button>
+          </div>
+          
+          <div className="about-footer">
+            <div className="social-links">
+              <h3>Connect With Us</h3>
+              <div className="social-icons">
+                <a href="#" className="social-icon">
+                  <Twitter size={24} />
+                </a>
+                <a href="#" className="social-icon">
+                  <Instagram size={24} />
+                </a>
+                <a href="#" className="social-icon">
+                  <Linkedin size={24} />
+                </a>
+                <a href="#" className="social-icon">
+                  <Github size={24} />
+                </a>
+              </div>
+            </div>
+            
+            <div className="contact-info">
+              <h3>Contact Us</h3>
+              <p>hello@thumbnailguru.com</p>
+              <p>123 Creative Ave, San Francisco, CA 94103</p>
+            </div>
+          </div> */}
         </div>
       </div>
-     </div>
     </div>
   );
 };
