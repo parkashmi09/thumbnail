@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Header.css';
-import { Menu, X, User, LogOut, Home, Settings, Info, Star, HelpCircle, Crown, Clock, Coins } from 'lucide-react';
+import { Menu, X, User, LogOut, Home, Settings, Info, Star, HelpCircle, Crown, Clock, Coins, FileText, Shield, RefreshCcw } from 'lucide-react';
 import { Popover } from '@headlessui/react';
 import logo from '../../assets/images/LOGO.png';
 import { LoginModal } from '../Auth/AuthModals';
@@ -143,6 +143,21 @@ const Header = () => {
     closeDrawer();
   };
 
+  const goToTerms = () => {
+    navigate('/terms');
+    closeDrawer();
+  };
+
+  const goToPrivacy = () => {
+    navigate('/privacy');
+    closeDrawer();
+  };
+
+  const goToRefund = () => {
+    navigate('/refund');
+    closeDrawer();
+  };
+
   const handleOpenLogin = () => {
     closeDrawer();
     setIsLoginOpen(true);
@@ -232,6 +247,21 @@ const Header = () => {
                           <button className="panel-item" onClick={goToAbout}>
                             <Info size={18} />
                             <span>About Us</span>
+                          </button>
+                          
+                          <button className="panel-item" onClick={goToTerms}>
+                            <FileText size={18} />
+                            <span>Terms & Conditions</span>
+                          </button>
+                          
+                          <button className="panel-item" onClick={goToPrivacy}>
+                            <Shield size={18} />
+                            <span>Privacy Policy</span>
+                          </button>
+                          
+                          <button className="panel-item" onClick={goToRefund}>
+                            <RefreshCcw size={18} />
+                            <span>Refund Policy</span>
                           </button>
                           
                           <div className="panel-divider"></div>
@@ -339,6 +369,18 @@ const Header = () => {
                   <Info size={20} />
                   <span>About Us</span>
                 </button>
+                <button className="drawer-item" onClick={goToTerms}>
+                  <FileText size={20} />
+                  <span>Terms & Conditions</span>
+                </button>
+                <button className="drawer-item" onClick={goToPrivacy}>
+                  <Shield size={20} />
+                  <span>Privacy Policy</span>
+                </button>
+                <button className="drawer-item" onClick={goToRefund}>
+                  <RefreshCcw size={20} />
+                  <span>Refund Policy</span>
+                </button>
               </div>
               
               <div className="drawer-footer">
@@ -381,6 +423,18 @@ const Header = () => {
                 <button className="drawer-item" onClick={goToAbout}>
                   <Info size={20} />
                   <span>About Us</span>
+                </button>
+                <button className="drawer-item" onClick={goToTerms}>
+                  <FileText size={20} />
+                  <span>Terms & Conditions</span>
+                </button>
+                <button className="drawer-item" onClick={goToPrivacy}>
+                  <Shield size={20} />
+                  <span>Privacy Policy</span>
+                </button>
+                <button className="drawer-item" onClick={goToRefund}>
+                  <RefreshCcw size={20} />
+                  <span>Refund Policy</span>
                 </button>
               </div>
               

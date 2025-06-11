@@ -12,6 +12,9 @@ import RecentProjects from './pages/RecentProjects';
 import Pricing from './pages/Pricing';
 import { LoginModal } from './components/Auth/AuthModals.jsx';
 import { CreditsProvider } from './context/CreditsContext.jsx';
+import TermsAndConditions from './pages/TermsAndConditions';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import RefundPolicy from './pages/RefundPolicy';
 
 // Auth protected route component
 const ProtectedRoute = ({ children }) => {
@@ -110,6 +113,9 @@ function App() {
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/help" element={<Help />} />
             <Route path="/about" element={<AboutUs />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/refund" element={<RefundPolicy />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </CategoryProvider>
